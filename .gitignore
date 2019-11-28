@@ -1,0 +1,4 @@
+data/json
+go.sum
+*.zip
+*.exe
