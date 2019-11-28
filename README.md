@@ -1,6 +1,8 @@
-## video-srt
+## VideoSrt 简介
+ 
+`VideoSrt` 是用 `Golang`语言，基于 [lxn/walk](https://github.com/lxn/walk) Windows-GUI 工具包开发。
 
-这是一个可以识别视频语音自动生成字幕SRT文件的开源`Windows-GUI`软件工具。
+这是一个可以识别视频语音自动生成字幕SRT文件的开源软件工具。
 
 适用于快速、批量的为视频创建中/英文字幕文件的业务场景。
 
@@ -10,7 +12,7 @@ CLI（命令行）版本：[https://github.com/wxbool/video-srt](https://github.
 
 
 ## 界面预览
-![界面预览](https://ae01.alicdn.com/kf/Hd5970633269141cc8c3341ab5397d714d.gif)
+![界面预览](https://ae01.alicdn.com/kf/H25ddce9a0b39489cab2ed2e5179fc7e3s.gif)
 
 
 ## Download 
@@ -36,3 +38,8 @@ CLI（命令行）版本：[https://github.com/wxbool/video-srt](https://github.
     * 在 `OSS对象存储` 控制台创建一个存储空间（Bucket）（读写权限设置为`公共读`）
     * 在 `智能语音交互` 控制台创建一个项目（根据使用场景选择识别语言以及偏好等）
     * 关于这块操作，后续会出一个视频教程，敬请关注。
+    
+    
+## 联系方式
+* QQ：2012210812
+* 群：`暂无`
