@@ -2,3 +2,4 @@ data/json
 go.sum
 *.zip
 *.exe
+.idea
