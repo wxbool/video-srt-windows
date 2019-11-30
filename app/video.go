@@ -287,7 +287,7 @@ func AliyunAudioResultMakeSubtitleFile(outputDir string , video string , AudioRe
 		}
 
 		defer file.Close() //defer
-		index := 1
+		index := 0
 		for _ , data := range result {
 			linestr := MakeSubtitleText(index , data.BeginTime , data.EndTime , data.Text)
 			file.WriteString(linestr)
@@ -307,7 +307,6 @@ func MakeSubtitleText(index int , startTime int64 , endTime int64 , text string)
 	content.WriteString(tool.SubtitleTimeMillisecond(endTime))
 	content.WriteString("\n")
 	content.WriteString(text)
-	content.WriteString("\n")
 	content.WriteString("\n")
 	content.WriteString("\n")
 	return content.String()
