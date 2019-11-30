@@ -3,6 +3,7 @@ package aliyun
 import (
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -70,5 +71,9 @@ func (c AliyunOss) UploadFile(localFileName string , objectName string) (string 
 
 //获取文件 url link
 func (c AliyunOss) GetObjectFileUrl(objectFile string) string {
-	return c.BucketDomain + "/" +  objectFile
+	if strings.Index(c.BucketDomain, "http://") == -1 && strings.Index(c.BucketDomain, "https://") == -1 {
+		return "http://" + c.BucketDomain + "/" +  objectFile
+	} else {
+		return c.BucketDomain + "/" +  objectFile
+	}
 }

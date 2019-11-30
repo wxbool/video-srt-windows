@@ -116,7 +116,7 @@ func (c AliyunClound) NewAudioFile(fileLink string) (string , *sdk.Client , erro
 		return taskId , client , nil
 	}
 
-	return "" , client , errors.New("录音文件识别请求失败 !")
+	return "" , client , errors.New("录音文件识别请求失败 ! statusText : " + statusText)
 }
 
 
