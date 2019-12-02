@@ -21,6 +21,7 @@ type VideoSrt struct {
 	TempDir string //临时文件目录
 	AppDir string //应用根目录
 	SrtDir string //字幕文件输出目录
+	OutputType int //输出文件类型
 
 	LogHandler func(s string , video string) //日志回调
 	SuccessHandler func(video string) //成功回调
@@ -35,6 +36,7 @@ func NewApp(appDir string) *VideoSrt {
 	app.IntelligentBlock = true
 	app.TempDir = "temp/audio"
 	app.AppDir = appDir
+	app.OutputType = OUTPUT_SRT
 	return app
 }
 
@@ -53,8 +55,13 @@ func (app *VideoSrt) InitConfig(oss *AliyunOssCache , engine *AliyunEngineCache)
 	app.AliyunClound.AccessKeySecret = engine.AccessKeySecret
 }
 
+
 func (app *VideoSrt) SetSrtDir(dir string)  {
 	app.SrtDir = dir
+}
+
+func (app *VideoSrt) SetOutputType(output int)  {
+	app.OutputType = output
 }
 
 func (app *VideoSrt) SetSuccessHandler(callback func(video string))  {
@@ -107,11 +114,18 @@ func (app *VideoSrt) Run(video string) {
 		}
 	}()
 
+	//智能分段校验
+	if app.OutputType == OUTPUT_SRT {
+		app.IntelligentBlock = true
+	} else {
+		app.IntelligentBlock = false //非输出字幕文件 关闭智能分段
+	}
+
 	if video == "" {
 		panic("enter a video file waiting to be processed .")
 	}
 
-	//校验视频
+	//校验媒体文件
 	if tool.VaildVideo(video) != true {
 		panic("the input video file does not exist .")
 	}
@@ -128,7 +142,7 @@ func (app *VideoSrt) Run(video string) {
 
 	app.Log("提取音频文件 ..." , video)
 
-	//分离视频音频
+	//分离/转换媒体音频
 	ExtractVideoAudio(video , tmpAudio)
 
 	app.Log("上传音频文件 ..." , video)
@@ -146,7 +160,7 @@ func (app *VideoSrt) Run(video string) {
 	app.Log("文件识别成功 , 字幕处理中 ..." , video)
 
 	//输出字幕文件
-	AliyunAudioResultMakeSubtitleFile(app.SrtDir , video , AudioResult)
+	AliyunAudioResultMakeSubtitleFile(app.OutputType , app.SrtDir , video , AudioResult)
 
 	app.Log("处理完成" , video)
 
@@ -266,7 +280,7 @@ func AliyunAudioRecognition(engine aliyun.AliyunClound , filelink string , intel
 
 
 //阿里云录音识别结果集生成字幕文件
-func AliyunAudioResultMakeSubtitleFile(outputDir string , video string , AudioResult map[int64][] *aliyun.AliyunAudioRecognitionResult)  {
+func AliyunAudioResultMakeSubtitleFile(outputType int , outputDir string , video string , AudioResult map[int64][] *aliyun.AliyunAudioRecognitionResult)  {
 	var subfileDir string
 	if outputDir == "" {
 		subfileDir = path.Dir(video)
@@ -276,23 +290,36 @@ func AliyunAudioResultMakeSubtitleFile(outputDir string , video string , AudioRe
 
 	subfile := tool.GetFileBaseName(video)
 
-	//输出字幕文件
+	//输出文件
 	for channel,result := range AudioResult {
-		thisfile := subfileDir + "/" + subfile + "_channel_" +  strconv.FormatInt(channel , 10) + ".srt"
+		var thisfile = subfileDir + "/" + subfile + "_channel_" +  strconv.FormatInt(channel , 10)
+		//输出文件类型
+		if outputType == OUTPUT_SRT {
+			thisfile += ".srt"
+		} else {
+			thisfile += ".txt"
+		}
 		//println(thisfile)
 
 		file, e := os.Create(thisfile)
 		if e != nil {
 			panic(e)
 		}
-
-		defer file.Close() //defer
 		index := 0
 		for _ , data := range result {
-			linestr := MakeSubtitleText(index , data.BeginTime , data.EndTime , data.Text)
-			file.WriteString(linestr)
+			var linestr string
+			if outputType == OUTPUT_SRT {
+				linestr = MakeSubtitleText(index , data.BeginTime , data.EndTime , data.Text)
+			} else {
+				linestr = MakeText(index , data.BeginTime , data.EndTime , data.Text)
+			}
+			if _, e = file.WriteString(linestr);e != nil {
+				panic(e)
+			}
 			index++
 		}
+		//close
+		_ = file.Close()
 	}
 }
 
@@ -301,13 +328,22 @@ func AliyunAudioResultMakeSubtitleFile(outputDir string , video string , AudioRe
 func MakeSubtitleText(index int , startTime int64 , endTime int64 , text string) string {
 	var content bytes.Buffer
 	content.WriteString(strconv.Itoa(index))
-	content.WriteString("\n")
+	content.WriteString("\r\n")
 	content.WriteString(tool.SubtitleTimeMillisecond(startTime))
 	content.WriteString(" --> ")
 	content.WriteString(tool.SubtitleTimeMillisecond(endTime))
-	content.WriteString("\n")
+	content.WriteString("\r\n")
 	content.WriteString(text)
-	content.WriteString("\n")
-	content.WriteString("\n")
+	content.WriteString("\r\n")
+	content.WriteString("\r\n")
+	return content.String()
+}
+
+//拼接文本
+func MakeText(index int , startTime int64 , endTime int64 , text string) string {
+	var content bytes.Buffer
+	content.WriteString(text)
+	content.WriteString("\r\n")
+	content.WriteString("\r\n")
 	return content.String()
 }

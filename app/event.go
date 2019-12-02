@@ -38,6 +38,9 @@ func(mw *MyMainWindow) RunAppSetingDialog(owner walk.Form , confirmCall func(*Ap
 	if setings.MaxConcurrency == 0 {
 		setings.MaxConcurrency = 2 //默认并发数
 	}
+	if setings.OutputType == 0 {
+		setings.OutputType = 1 //默认输出文件类型
+	}
 
 	Dialog{
 		AssignTo:      &dlg,
@@ -56,6 +59,18 @@ func(mw *MyMainWindow) RunAppSetingDialog(owner walk.Form , confirmCall func(*Ap
 			Composite{
 				Layout: Grid{Columns: 2},
 				Children: []Widget{
+					//输出文件类型
+					Label{
+						Text: "输出文件类型:",
+					},
+					ComboBox{
+						Value: Bind("OutputType", SelRequired{}),
+						BindingMember: "Id",
+						DisplayMember: "Name",
+						Model: GetOutputOptionsSelects(),
+					},
+
+
 					Label{
 						Text: "任务处理并发数：",
 					},
@@ -73,8 +88,8 @@ func(mw *MyMainWindow) RunAppSetingDialog(owner walk.Form , confirmCall func(*Ap
 
 					Label{
 						ColumnSpan: 2,
+						Text: "说明：\r\n“字幕文件输出目录” 若留空，则默认与媒体文件输出到同一目录下",
 						TextColor:walk.RGB(190 , 190 , 190),
-						Text: "说明：\r\n“字幕文件输出目录” 若留空，则默认与视频文件输出到同一目录下",
 					},
 				},
 			},
@@ -363,7 +378,10 @@ func (mw *MyMainWindow) OpenAboutGitee() {
 //校验待处理文件
 func VaildateHandleFiles(files [] string) ([]string , error) {
 	result := []string{}
-	allowExts := []string{".mp4",".mpeg",".wmv",".avi",".m4v",".mov",".flv",".rmvb",".3gp",".f4v"}
+	allowExts := []string{
+		".mp4",".mpeg",".wmv",".avi",".m4v",".mov",".flv",".rmvb",".3gp",".f4v",
+		".mp3",".wav",".aac",".wma",
+	}
 	for _,f := range files {
 		f = tool.WinDir(f)
 		if thisFile, err := os.Stat(f); err != nil {

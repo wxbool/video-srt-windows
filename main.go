@@ -13,7 +13,7 @@ import (
 )
 
 //应用版本号
-const APP_VERSION = "0.1.2.1"
+const APP_VERSION = "0.1.3"
 
 var AppRootDir string
 var mw *MyMainWindow
@@ -130,7 +130,9 @@ func main() {
 									//更新配置
 									appSetings.MaxConcurrency = setings.MaxConcurrency
 									appSetings.SrtFileDir = setings.SrtFileDir
+									appSetings.OutputType = setings.OutputType
 
+									videosrt.SetOutputType( setings.OutputType )
 									videosrt.SetSrtDir( setings.SrtFileDir )
 									multitask.SetMaxConcurrencyNumber( setings.MaxConcurrency )
 								})
@@ -151,6 +153,13 @@ func main() {
 							Text:        "gitee",
 							Image:      "./data/img/gitee.png",
 							OnTriggered: mw.OpenAboutGitee,
+						},
+						Action{
+							Text:        "最新版本",
+							Image:      "./data/img/version.png",
+							OnTriggered: func() {
+								tool.OpenUrl("https://gitee.com/641453620/video-srt-windows/releases")
+							},
 						},
 					},
 				},
@@ -239,7 +248,8 @@ func main() {
 					TextEdit{
 						AssignTo: &dropFilesEdit,
 						ReadOnly: true,
-						Text:     "将需要生成字幕的视频文件，拖入放到这里",
+						Text:     "将需要生成字幕的媒体文件，拖入放到这里\r\n\r\n支持的视频格式：.mp4 , .mpeg , .wmv , .avi , .m4v , .mov , .flv , .rmvb , .3gp , .f4v\r\n支持的音频格式：.mp3 , .wav , .aac , .wma",
+						TextColor:walk.RGB(136 , 136 , 136),
 					},
 					TextEdit{
 						AssignTo: &logText,
@@ -252,7 +262,7 @@ func main() {
 			},
 			PushButton{
 				AssignTo: &startBtn,
-				Text: "生成字幕文件",
+				Text: "生成文件",
 				MinSize:Size{500 , 50},
 				OnClicked: func() {
 
@@ -281,11 +291,14 @@ func main() {
 					}
 					//加载配置
 					videosrt.InitConfig(ossData , currentEngine)
+					videosrt.SetSrtDir(appSetings.SrtFileDir)
+					if appSetings.OutputType != 0 {
+						videosrt.SetOutputType(appSetings.OutputType)
+					}
 
 					multitask.SetVideoSrt(videosrt)
 					//设置队列
 					multitask.SetQueueFile(taskFiles.Files)
-
 
 					var finish = false
 
@@ -310,7 +323,7 @@ func main() {
 								time.Sleep(time.Second)
 								finish = true
 								startBtn.SetEnabled(true)
-								startBtn.SetText("生成字幕文件")
+								startBtn.SetText("生成文件")
 
 								logText.AppendText("\r\n\r\n任务完成！")
 

@@ -9,6 +9,12 @@ var RootDir string
 
 var oss,engine,setings *datacache.AppCache
 
+//输出文件类型
+const(
+	OUTPUT_SRT = 1 //字幕文件
+	OUTPUT_STRING = 2 //普通文本
+)
+
 func init()  {
 	RootDir = GetAppRootDir()
 	if RootDir == "" {
@@ -34,6 +40,12 @@ type EngineSelects struct {
 	Name string
 }
 
+//输出类型选项
+type OutputSelects struct {
+	Id   int
+	Name string
+}
+
 //阿里云OSS - 缓存结构
 type AliyunOssCache struct {
 	aliyun.AliyunOss
@@ -55,6 +67,7 @@ type AliyunEngineListCache struct {
 type AppSetings struct {
 	CurrentEngineId int //目前使用引擎Id
 	MaxConcurrency int //任务最大处理并发数
+	OutputType int //输出文件类型
 	SrtFileDir string //Srt文件输出目录
 }
 
@@ -175,4 +188,13 @@ func GetCurrentIndex(data []*EngineSelects , id int) int {
 		}
 	}
 	return -1
+}
+
+
+//获取 输出文件选项列表
+func GetOutputOptionsSelects() []*OutputSelects {
+	return []*OutputSelects{
+		&OutputSelects{Id:OUTPUT_SRT , Name:"字幕文件"},
+		&OutputSelects{Id:OUTPUT_STRING , Name:"普通文本"},
+	}
 }
