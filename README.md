@@ -12,14 +12,22 @@ CLI（命令行）版本：[https://github.com/wxbool/video-srt](https://github.
 
 
 ## 界面预览
-![界面预览](https://ae01.alicdn.com/kf/H25ddce9a0b39489cab2ed2e5179fc7e3s.gif)
+![界面预览](https://pic1.superbed.cn/item/5de4cf17119afd7d7ecb5f5b.gif)
+
+
+## 优势
+* 使用阿里云语音识别接口，准确度高，标准普通话/英语识别率95%以上
+* 视频识别无需上传原视频，方便且节省时间
+* 支持多任务多文件并发处理
+* 支持视频、音频常见多种格式文件
+* 支持输出字幕文件、普通文本两种类型
 
 
 ## Download 
 
-##### 下载地址:(v0.1.2.1)
-* .zip（含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.1.2.1/video-srt-gui-ffmpeg-0.1.2.1-x64.zip)
-* .zip（不含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.1.2.1/video-srt-gui-0.1.2.1-x64.zip)
+##### 下载地址:(v0.1.3)
+* .zip（含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.1.3/video-srt-gui-ffmpeg-0.1.3-x64.zip)
+* .zip（不含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.1.3/video-srt-gui-0.1.3-x64.zip)
 
 你也可以到 [release](https://github.com/wxbool/video-srt-windows/releases) 页面下载其他版本
 
