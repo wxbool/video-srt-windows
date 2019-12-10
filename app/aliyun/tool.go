@@ -113,6 +113,7 @@ func AliyunAudioResultWordHandle(result [] byte , callback func (vresult *Aliyun
 				for windex , w := range p {
 					if word.BeginTime >= w.BeginTime && word.EndTime <= w.EndTime {
 						flag := false
+						early := false
 						for t , B := range w.Blocks{
 							if (blockRune >= B) && B != -1 {
 								flag = true
@@ -127,11 +128,26 @@ func AliyunAudioResultWordHandle(result [] byte , callback func (vresult *Aliyun
 								if t == (len(w.Blocks) - 1) {
 									thisText = SubString(w.Text , lastBlock , 10000)
 								} else {
-									thisText = SubString(w.Text , lastBlock , (B - lastBlock))
+									//下个词提前结束
+									if i < len(value)-1 && value[i+1].BeginTime >= w.EndTime{
+										thisText = SubString(w.Text , lastBlock , 10000)
+										early = true
+									} else {
+										thisText = SubString(w.Text , lastBlock , (B - lastBlock))
+									}
 								}
 
 								lastBlock = B
-								w.Blocks[t] = -1
+								if early == true {
+									//全部设置为-1
+									for vt,vb := range w.Blocks{
+										if vb != -1 {
+											w.Blocks[vt] = -1;
+										}
+									}
+								} else {
+									w.Blocks[t] = -1
+								}
 
 								vresult := &AliyunAudioRecognitionResult{
 									Text:thisText,
