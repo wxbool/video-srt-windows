@@ -379,7 +379,7 @@ func (mw *MyMainWindow) OpenAboutGitee() {
 func VaildateHandleFiles(files [] string) ([]string , error) {
 	result := []string{}
 	allowExts := []string{
-		".mp4",".mpeg",".wmv",".avi",".m4v",".mov",".flv",".rmvb",".3gp",".f4v",
+		".mp4",".mpeg",".mkv",".wmv",".avi",".m4v",".mov",".flv",".rmvb",".3gp",".f4v",
 		".mp3",".wav",".aac",".wma",
 	}
 	for _,f := range files {
