@@ -2,7 +2,9 @@ package aliyun
 
 import (
 	"github.com/buger/jsonparser"
+	"regexp"
 	"strings"
+	"unicode"
 	"unicode/utf8"
 )
 
@@ -97,13 +99,19 @@ func AliyunAudioResultWordHandle(result [] byte , callback func (vresult *Aliyun
 		var beginTime int64 = 0
 		var blockBool = false
 
+		var ischinese = IsChineseWords(value) //校验中文
+
 		for i , word := range value {
 			if blockBool || i == 0 {
 				beginTime = word.BeginTime
 				blockBool = false
 			}
 
-			block += word.Word
+			if ischinese {
+				block += word.Word
+			} else {
+				block += CompleSpace(word.Word) //补全空格
+			}
 			blockRune = utf8.RuneCountInString(block)
 
 			for channel , p := range audioResult {
@@ -114,6 +122,7 @@ func AliyunAudioResultWordHandle(result [] byte , callback func (vresult *Aliyun
 					if word.BeginTime >= w.BeginTime && word.EndTime <= w.EndTime {
 						flag := false
 						early := false
+
 						for t , B := range w.Blocks{
 							if (blockRune >= B) && B != -1 {
 								flag = true
@@ -121,7 +130,8 @@ func AliyunAudioResultWordHandle(result [] byte , callback func (vresult *Aliyun
 								//fmt.Println(  block )
 								//fmt.Println(  w.Text )
 								//fmt.Println(  w.Blocks )
-								//fmt.Println( blockRune , B , lastBlock , (B - lastBlock) )
+								//fmt.Println(B , lastBlock , (B - lastBlock) , word.Word)
+								//fmt.Println(w.Text)
 
 								var thisText = ""
 								//容错机制
@@ -164,6 +174,9 @@ func AliyunAudioResultWordHandle(result [] byte , callback func (vresult *Aliyun
 								break
 							}
 						}
+
+						//fmt.Println("word.Word:" , word.Word)
+						//fmt.Println(block)
 
 						if FindSliceIntCount(w.Blocks , -1) == len(w.Blocks) {
 							//全部截取完成
@@ -240,6 +253,31 @@ func StringIndex(strs string , word rune) int {
 		}
 	}
 	return -1
+}
+
+//补全右边空格
+func CompleSpace(s string) string {
+	s = strings.TrimLeft(s , " ");
+	s = strings.TrimRight(s , " ");
+	return s + " ";
+}
+
+func IsChineseWords(words []*AliyunAudioWord) bool {
+	for _,v := range words {
+		if (IsChineseChar(v.Word)){
+			return true
+		}
+	}
+	return false
+}
+
+func IsChineseChar(str string) bool {
+	for _, r := range str {
+		if unicode.Is(unicode.Scripts["Han"], r) || (regexp.MustCompile("[\u3002\uff1b\uff0c\uff1a\u201c\u201d\uff08\uff09\u3001\uff1f\u300a\u300b]").MatchString(string(r))) {
+			return true
+		}
+	}
+	return false
 }
 
 func IndexRunes(strs string , olds []rune) int  {
