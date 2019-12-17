@@ -6,13 +6,13 @@
 
 适用于快速、批量的为视频创建中/英文字幕文件的业务场景。
 
-本项目使用了阿里云的[OSS对象存储](https://www.aliyun.com/product/oss?spm=5176.12825654.eofdhaal5.13.e9392c4aGfj5vj&aly_as=K11FcpO8)、[录音文件识别](https://ai.aliyun.com/nls/filetrans?spm=5176.12061031.1228726.1.47fe3cb43I34mn)的相关业务接口。
+本项目使用了阿里云的[OSS对象存储](https://www.aliyun.com/product/oss?spm=5176.12825654.eofdhaal5.13.e9392c4aGfj5vj&aly_as=K11FcpO8)、[录音文件识别](https://ai.aliyun.com/nls/filetrans?spm=5176.12061031.1228726.1.47fe3cb43I34mn) 以及 [百度翻译](http://api.fanyi.baidu.com/api/trans/product/index) 的相关业务接口。
 
 CLI（命令行）版本：[https://github.com/wxbool/video-srt](https://github.com/wxbool/video-srt)
 
 
 ## 界面预览
-![界面预览](https://pic1.superbed.cn/item/5de4cf17119afd7d7ecb5f5b.gif)
+![界面预览](https://ae01.alicdn.com/kf/H79c2202bb1734f15a870059b27fc9519E.gif)
 
 
 ## 优势
@@ -21,13 +21,14 @@ CLI（命令行）版本：[https://github.com/wxbool/video-srt](https://github.
 * 支持多任务多文件并发处理
 * 支持视频、音频常见多种格式文件
 * 支持输出字幕文件、普通文本两种类型
+* 支付字幕中英互译、双语字幕输出
 
 
 ## Download 
 
-##### 下载地址:(v0.1.6)
-* .zip（含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.1.6/video-srt-gui-ffmpeg-0.1.6-x64.zip)
-* .zip（不含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.1.6/video-srt-gui-0.1.6-x64.zip)
+##### 下载地址:(v0.2.0)
+* .zip（含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.2.0/video-srt-gui-ffmpeg-0.2.0-x64.zip)
+* .zip（不含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.2.0/video-srt-gui-0.2.0-x64.zip)
 
 你也可以到 [release](https://github.com/wxbool/video-srt-windows/releases) 页面下载其他版本
 
@@ -36,6 +37,9 @@ CLI（命令行）版本：[https://github.com/wxbool/video-srt](https://github.
 * 软件目录下的 `data`目录为数据存储目录，请勿删除。否则可能会导致配置丢失
 * 项目使用了 [ffmpeg](http://ffmpeg.org/) 依赖，除非您的电脑已经安装了`ffmpeg`环境，否则请下载包含`ffmpeg`依赖的软件包
 
+## 升级说明
+* 先下载最新版本的软件包；
+* 然后用旧版本软件的 `data` 文件夹覆盖新版软件的 `data` 文件夹
 
 ## FAQ
 * 软件支持哪些语言？
