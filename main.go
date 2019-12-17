@@ -13,7 +13,7 @@ import (
 )
 
 //应用版本号
-const APP_VERSION = "0.1.6"
+const APP_VERSION = "0.2.0"
 
 var AppRootDir string
 var mw *MyMainWindow
@@ -116,10 +116,17 @@ func main() {
 					Image: "./data/img/setings.png",
 					Items: []MenuItem{
 						Action{
-							Text:    "Oss对象存储设置",
+							Text:    "OSS对象存储设置",
 							Image:   "./data/img/oss.png",
 							OnTriggered: func() {
 								mw.RunObjectStorageSetingDialog(mw)
+							},
+						},
+						Action{
+							Text:    "翻译设置",
+							Image:   "./data/img/translate.png",
+							OnTriggered: func() {
+								mw.RunTranslateSetingDialog(mw)
 							},
 						},
 						Action{
@@ -131,9 +138,11 @@ func main() {
 									appSetings.MaxConcurrency = setings.MaxConcurrency
 									appSetings.SrtFileDir = setings.SrtFileDir
 									appSetings.OutputType = setings.OutputType
+									appSetings.SoundTrack = setings.SoundTrack
 
 									videosrt.SetOutputType( setings.OutputType )
 									videosrt.SetSrtDir( setings.SrtFileDir )
+									videosrt.SetSoundTrack( setings.SoundTrack )
 									multitask.SetMaxConcurrencyNumber( setings.MaxConcurrency )
 								})
 							},
@@ -289,9 +298,14 @@ func main() {
 						mw.NewErrormationTips("错误" , "你选择的语音引擎不存在")
 						return
 					}
+
+					//翻译接口设置
+					translateData := GetCacheTranslateSettings()
+
 					//加载配置
-					videosrt.InitConfig(ossData , currentEngine)
+					videosrt.InitConfig(ossData , currentEngine , translateData)
 					videosrt.SetSrtDir(appSetings.SrtFileDir)
+					videosrt.SetSoundTrack(appSetings.SoundTrack)
 					if appSetings.OutputType != 0 {
 						videosrt.SetOutputType(appSetings.OutputType)
 					}

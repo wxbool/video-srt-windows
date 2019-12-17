@@ -1,6 +1,8 @@
 package tool
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"math/rand"
 	"os"
 	"os/exec"
@@ -165,4 +167,12 @@ func VaildVideo (video string) bool {
 		return false
 	}
 	return true
+}
+
+
+//文本md5
+func Md5String(str string) string {
+	h := md5.New()
+	h.Write([]byte(str))
+	return hex.EncodeToString(h.Sum(nil))
 }

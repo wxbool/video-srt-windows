@@ -3,11 +3,12 @@ package app
 import (
 	"videosrt/app/aliyun"
 	"videosrt/app/datacache"
+	"videosrt/app/translate"
 )
 
 var RootDir string
 
-var oss,engine,setings *datacache.AppCache
+var oss,translates,engine,setings *datacache.AppCache
 
 //输出文件类型
 const(
@@ -22,6 +23,7 @@ func init()  {
 	}
 
 	oss = datacache.NewAppCahce(RootDir , "oss")
+	translates = datacache.NewAppCahce(RootDir , "translate")
 	engine = datacache.NewAppCahce(RootDir , "engine")
 	setings = datacache.NewAppCahce(RootDir , "setings")
 }
@@ -46,9 +48,23 @@ type OutputSelects struct {
 	Name string
 }
 
+//输出音轨类型选项
+type SoundTrackSelects struct {
+	Id   int
+	Name string
+}
+
 //阿里云OSS - 缓存结构
 type AliyunOssCache struct {
 	aliyun.AliyunOss
+}
+
+//软件翻译接口 - 缓存结构
+type TranslateCache struct {
+	translate.BaiduTranslate //百度翻译
+
+	AutoTranslation bool //中英互译（默认关闭）
+	BilingualSubtitles bool //输出双语字幕（默认关闭）
 }
 
 //阿里云语音识别引擎 - 缓存结构
@@ -69,6 +85,7 @@ type AppSetings struct {
 	MaxConcurrency int //任务最大处理并发数
 	OutputType int //输出文件类型
 	SrtFileDir string //Srt文件输出目录
+	SoundTrack int //输出音轨
 }
 
 //任务文件列表 - 结构
@@ -90,6 +107,22 @@ func GetCacheAliyunOssData() *AliyunOssCache {
 //设置 阿里云OSS 缓存
 func SetCacheAliyunOssData(data *AliyunOssCache) {
 	oss.Set(data)
+}
+
+
+//获取 软件翻译接口 设置缓存
+func GetCacheTranslateSettings() *TranslateCache {
+	data := new(TranslateCache)
+	vdata := translates.Get(data)
+	if v, ok := vdata.(*TranslateCache); ok {
+		return v
+	}
+	return data
+}
+
+//设置 软件翻译接口 缓存
+func SetCacheTranslateSettings(data *TranslateCache)  {
+	translates.Set(data)
 }
 
 
@@ -196,5 +229,14 @@ func GetOutputOptionsSelects() []*OutputSelects {
 	return []*OutputSelects{
 		&OutputSelects{Id:OUTPUT_SRT , Name:"字幕文件"},
 		&OutputSelects{Id:OUTPUT_STRING , Name:"普通文本"},
+	}
+}
+
+//获取 输出音轨选项列表
+func GetSoundTrackSelects() []*SoundTrackSelects {
+	return []*SoundTrackSelects{
+		&SoundTrackSelects{Id:0 , Name:"全部"},
+		&SoundTrackSelects{Id:1 , Name:"音轨一"},
+		&SoundTrackSelects{Id:2 , Name:"音轨二"},
 	}
 }

@@ -70,6 +70,15 @@ func(mw *MyMainWindow) RunAppSetingDialog(owner walk.Form , confirmCall func(*Ap
 						Model: GetOutputOptionsSelects(),
 					},
 
+					Label{
+						Text: "输出音轨：",
+					},
+					ComboBox{
+						Value: Bind("SoundTrack", SelRequired{}),
+						BindingMember: "Id",
+						DisplayMember: "Name",
+						Model: GetSoundTrackSelects(),
+					},
 
 					Label{
 						Text: "任务处理并发数：",
@@ -188,6 +197,12 @@ func(mw *MyMainWindow) RunSpeechEngineSetingDialog(owner walk.Form , confirmCall
 					LineEdit{
 						Text: Bind("AccessKeySecret"),
 					},
+
+					Label{
+						ColumnSpan: 2,
+						Text: "说明：\r\n“语音识别” 目前使用的是阿里云语音服务商，请填写相关的引擎配置。",
+						TextColor:walk.RGB(190 , 190 , 190),
+					},
 				},
 			},
 			Composite{
@@ -262,7 +277,7 @@ func (mw *MyMainWindow) RunObjectStorageSetingDialog(owner walk.Form) {
 
 	Dialog{
 		AssignTo:      &dlg,
-		Title:         "Oss对象存储设置",
+		Title:         "OSS对象存储设置",
 		DefaultButton: &acceptPB,
 		CancelButton:  &cancelPB,
 		DataBinder: DataBinder{
@@ -310,6 +325,12 @@ func (mw *MyMainWindow) RunObjectStorageSetingDialog(owner walk.Form) {
 					},
 					LineEdit{
 						Text: Bind("BucketDomain"),
+					},
+
+					Label{
+						ColumnSpan: 2,
+						Text: "说明：\r\n“OSS对象存储”目前使用的是阿里云服务，请填写相关的服务配置。",
+						TextColor:walk.RGB(190 , 190 , 190),
 					},
 				},
 			},
@@ -363,6 +384,122 @@ func (mw *MyMainWindow) RunObjectStorageSetingDialog(owner walk.Form) {
 		},
 	}.Run( owner )
 }
+
+
+//运行 翻译接口设置 Dialog
+func (mw *MyMainWindow) RunTranslateSetingDialog(owner walk.Form) {
+	var translateData *TranslateCache
+	var dlg *walk.Dialog
+	var db *walk.DataBinder
+	var acceptPB, cancelPB *walk.PushButton
+
+	translateData = GetCacheTranslateSettings() //查询缓存数据
+
+	Dialog{
+		AssignTo:      &dlg,
+		Title:         "翻译设置",
+		DefaultButton: &acceptPB,
+		CancelButton:  &cancelPB,
+		DataBinder: DataBinder{
+			AssignTo:       &db,
+			Name:           "oss",
+			DataSource:     translateData,
+			ErrorPresenter: ToolTipErrorPresenter{},
+		},
+		MinSize: Size{500, 300},
+		Layout:  VBox{},
+		Children: []Widget{
+			Composite{
+				Layout: Grid{Columns: 4},
+				Children: []Widget{
+
+					Label{
+						Text: "中英互译:",
+					},
+					CheckBox{
+						Checked: Bind("AutoTranslation"),
+					},
+
+					Label{
+						Text: "输出为双语字幕:",
+					},
+					CheckBox{
+						Checked: Bind("BilingualSubtitles"),
+					},
+
+
+					Label{
+						ColumnSpan: 4,
+						Text: "翻译接口设置：",
+						TextColor:walk.RGB(190 , 190 , 190),
+						MinSize:Size{Width:100 , Height:20},
+					},
+
+					Label{
+						Text: "AppId：",
+					},
+					LineEdit{
+						ColumnSpan: 3,
+						Text: Bind("AppId"),
+					},
+
+					Label{
+						Text: "AppSecret：",
+					},
+					LineEdit{
+						ColumnSpan: 3,
+						Text: Bind("AppSecret"),
+					},
+
+					Label{
+						ColumnSpan: 4,
+						Text: "说明：\r\n“文本翻译”目前使用的是百度翻译服务，请填写相关的服务配置。",
+						TextColor:walk.RGB(190 , 190 , 190),
+						MinSize:Size{Width:150 , Height:60},
+					},
+				},
+			},
+			Composite{
+				Layout: HBox{},
+				Children: []Widget{
+					HSpacer{},
+					PushButton{
+						AssignTo: &acceptPB,
+						Text:     "保存",
+						OnClicked: func() {
+							if err := db.Submit(); err != nil {
+								log.Fatal(err)
+								return
+							}
+
+							//参数验证
+							if (translateData.AppId == "") {
+								mw.NewInformationTips("提示" , "请填写 AppId")
+								return
+							}
+							if (translateData.AppSecret == "") {
+								mw.NewInformationTips("提示" , "请填写 AccessKeyId")
+								return
+							}
+
+							//设置缓存
+							SetCacheTranslateSettings(translateData)
+
+							dlg.Accept()
+						},
+					},
+					PushButton{
+						AssignTo:  &cancelPB,
+						Text:      "取消",
+						OnClicked: func() { dlg.Cancel() },
+					},
+				},
+			},
+		},
+	}.Run( owner )
+}
+
+
 
 //打开 Github
 func (mw *MyMainWindow) OpenAboutGithub() {

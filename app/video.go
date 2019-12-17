@@ -6,9 +6,11 @@ import (
 	"os"
 	"path"
 	"strconv"
+	"time"
 	"videosrt/app/aliyun"
 	"videosrt/app/ffmpeg"
 	"videosrt/app/tool"
+	"videosrt/app/translate"
 )
 
 //主应用
@@ -22,6 +24,12 @@ type VideoSrt struct {
 	AppDir string //应用根目录
 	SrtDir string //字幕文件输出目录
 	OutputType int //输出文件类型
+	SoundTrack int //输出音轨（0输出全部音轨）
+
+	//翻译设置
+	AutoTranslation bool //中英互译（默认关闭）
+	BilingualSubtitles bool //输出双语字幕（默认关闭）
+	BaiduTranslate translate.BaiduTranslate //百度翻译
 
 	LogHandler func(s string , video string) //日志回调
 	SuccessHandler func(video string) //成功回调
@@ -42,17 +50,24 @@ func NewApp(appDir string) *VideoSrt {
 
 
 //应用加载配置
-func (app *VideoSrt) InitConfig(oss *AliyunOssCache , engine *AliyunEngineCache) {
+func (app *VideoSrt) InitConfig(oss *AliyunOssCache , engine *AliyunEngineCache , trans *TranslateCache) {
 	//oss
 	app.AliyunOss.Endpoint = oss.Endpoint
 	app.AliyunOss.AccessKeyId = oss.AccessKeyId
 	app.AliyunOss.AccessKeySecret = oss.AccessKeySecret
 	app.AliyunOss.BucketName = oss.BucketName
 	app.AliyunOss.BucketDomain = oss.BucketDomain
+
 	//engine
 	app.AliyunClound.AppKey = engine.AppKey
 	app.AliyunClound.AccessKeyId = engine.AccessKeyId
 	app.AliyunClound.AccessKeySecret = engine.AccessKeySecret
+
+	//translate
+	app.BaiduTranslate.AppId = trans.AppId
+	app.BaiduTranslate.AppSecret = trans.AppSecret
+	app.AutoTranslation = trans.AutoTranslation
+	app.BilingualSubtitles = trans.BilingualSubtitles
 }
 
 
@@ -62,6 +77,10 @@ func (app *VideoSrt) SetSrtDir(dir string)  {
 
 func (app *VideoSrt) SetOutputType(output int)  {
 	app.OutputType = output
+}
+
+func (app *VideoSrt) SetSoundTrack(track int)  {
+	app.SoundTrack = track
 }
 
 func (app *VideoSrt) SetSuccessHandler(callback func(video string))  {
@@ -82,7 +101,7 @@ func (app *VideoSrt) Log(s string , v string)  {
 }
 
 //清空临时目录
-func  (app *VideoSrt) ClearTempDir()  {
+func (app *VideoSrt) ClearTempDir()  {
 	//临时目录
 	tmpAudioDir := app.AppDir + "/" + app.TempDir
 	if tool.DirExists(tmpAudioDir) {
@@ -91,6 +110,15 @@ func  (app *VideoSrt) ClearTempDir()  {
 			app.Log("清空临时文件夹失败，请手动操作" , "警告")
 		}
 	}
+}
+
+//运行翻译
+func (app *VideoSrt) RunTranslate(s string , from string , to string) *translate.BaiduTranslateResult {
+	result, e := app.BaiduTranslate.Translate(s, from, to)
+	if e != nil {
+		panic(e)
+	}
+	return result
 }
 
 //应用运行
@@ -160,7 +188,7 @@ func (app *VideoSrt) Run(video string) {
 	app.Log("文件识别成功 , 字幕处理中 ..." , video)
 
 	//输出字幕文件
-	AliyunAudioResultMakeSubtitleFile(app.OutputType , app.SrtDir , video , AudioResult)
+	AliyunAudioResultMakeSubtitleFile(app , video , AudioResult)
 
 	app.Log("处理完成" , video)
 
@@ -280,26 +308,38 @@ func AliyunAudioRecognition(engine aliyun.AliyunClound , filelink string , intel
 
 
 //阿里云录音识别结果集生成字幕文件
-func AliyunAudioResultMakeSubtitleFile(outputType int , outputDir string , video string , AudioResult map[int64][] *aliyun.AliyunAudioRecognitionResult)  {
+func AliyunAudioResultMakeSubtitleFile(app *VideoSrt , video string , AudioResult map[int64][] *aliyun.AliyunAudioRecognitionResult)  {
 	var subfileDir string
-	if outputDir == "" {
+	if app.SrtDir == "" {
 		subfileDir = path.Dir(video)
 	} else {
-		subfileDir = outputDir
+		subfileDir = app.SrtDir
 	}
 
 	subfile := tool.GetFileBaseName(video)
 
-	//输出文件
+	//日志
+	if app.AutoTranslation || app.BilingualSubtitles {
+		app.Log("字幕翻译处理中 ..." , video)
+	}
+
+	//根据音轨，输出文件
 	for channel,result := range AudioResult {
-		var thisfile = subfileDir + "/" + subfile + "_channel_" +  strconv.FormatInt(channel , 10)
+		soundChannel := channel + 1
+		if app.SoundTrack != 0 {
+			if app.SoundTrack != int(soundChannel) {
+				//跳过此音轨
+				continue
+			}
+		}
+
+		var thisfile = subfileDir + "/" + subfile + "_channel_" +  strconv.FormatInt(soundChannel , 10)
 		//输出文件类型
-		if outputType == OUTPUT_SRT {
+		if app.OutputType == OUTPUT_SRT {
 			thisfile += ".srt"
 		} else {
 			thisfile += ".txt"
 		}
-		//println(thisfile)
 
 		file, e := os.Create(thisfile)
 		if e != nil {
@@ -308,10 +348,28 @@ func AliyunAudioResultMakeSubtitleFile(outputType int , outputDir string , video
 		index := 0
 		for _ , data := range result {
 			var linestr string
-			if outputType == OUTPUT_SRT {
-				linestr = MakeSubtitleText(index , data.BeginTime , data.EndTime , data.Text)
+			var datastr string
+
+			if app.AutoTranslation && !app.BilingualSubtitles {
+				transResult := new(translate.BaiduTranslateResult)
+				if aliyun.IsChineseChar(data.Text) {
+					transResult = app.RunTranslate(data.Text , "auto" , "en")
+				} else {
+					transResult = app.RunTranslate(data.Text , "auto" , "zh")
+				}
+				datastr = transResult.TransResultDst //译文
+
+				//休眠100毫秒
+				time.Sleep(time.Millisecond * 100)
 			} else {
-				linestr = MakeText(index , data.BeginTime , data.EndTime , data.Text)
+				datastr = data.Text
+			}
+
+			//拼接文本
+			if app.OutputType == OUTPUT_SRT {
+				linestr = MakeSubtitleText(app , index , data.BeginTime , data.EndTime , datastr , app.BilingualSubtitles)
+			} else {
+				linestr = MakeText(index , data.BeginTime , data.EndTime , datastr)
 			}
 			if _, e = file.WriteString(linestr);e != nil {
 				panic(e)
@@ -325,7 +383,7 @@ func AliyunAudioResultMakeSubtitleFile(outputType int , outputDir string , video
 
 
 //拼接字幕字符串
-func MakeSubtitleText(index int , startTime int64 , endTime int64 , text string) string {
+func MakeSubtitleText(app *VideoSrt, index int , startTime int64 , endTime int64 , text string , bilingualSubtitles bool) string {
 	var content bytes.Buffer
 	content.WriteString(strconv.Itoa(index))
 	content.WriteString("\r\n")
@@ -333,11 +391,37 @@ func MakeSubtitleText(index int , startTime int64 , endTime int64 , text string)
 	content.WriteString(" --> ")
 	content.WriteString(tool.SubtitleTimeMillisecond(endTime))
 	content.WriteString("\r\n")
-	content.WriteString(text)
+
+	//双语字幕
+	if bilingualSubtitles {
+		var chinese string
+		var other string
+		transResult := new(translate.BaiduTranslateResult)
+		if aliyun.IsChineseChar(text) {
+			chinese = text
+			transResult = app.RunTranslate(text , "auto" , "en")
+			other = transResult.TransResultDst
+		} else {
+			other = text
+			transResult = app.RunTranslate(text , "auto" , "zh")
+			chinese = transResult.TransResultDst
+		}
+
+		content.WriteString(chinese)
+		content.WriteString("\r\n")
+		content.WriteString(other)
+
+		//休眠100毫秒
+		time.Sleep(time.Millisecond * 100)
+	} else {
+		content.WriteString(text)
+	}
+
 	content.WriteString("\r\n")
 	content.WriteString("\r\n")
 	return content.String()
 }
+
 
 //拼接文本
 func MakeText(index int , startTime int64 , endTime int64 , text string) string {
