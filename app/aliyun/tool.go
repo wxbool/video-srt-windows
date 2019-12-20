@@ -119,7 +119,8 @@ func AliyunAudioResultWordHandle(result [] byte , callback func (vresult *Aliyun
 					continue
 				}
 				for windex , w := range p {
-					if word.BeginTime >= w.BeginTime && word.EndTime <= w.EndTime {
+
+					if (word.BeginTime >= w.BeginTime && word.EndTime <= w.EndTime) || ((word.BeginTime < w.EndTime && word.EndTime > w.EndTime) && (FindSliceIntCount(w.Blocks , -1) != len(w.Blocks))) {
 						flag := false
 						early := false
 
