@@ -13,7 +13,7 @@ import (
 )
 
 //应用版本号
-const APP_VERSION = "0.2.1"
+const APP_VERSION = "0.2.2"
 
 var AppRootDir string
 var mw *MyMainWindow
@@ -82,6 +82,47 @@ func main() {
 			ButtonStyle: ToolBarButtonImageBeforeText,
 			Items: []MenuItem{
 				Menu{
+					Text:"打开",
+					Image: "./data/img/open.png",
+					Items: []MenuItem{
+						Action{
+							Image:  "./data/img/media.png",
+							Text:   "媒体文件",
+							OnTriggered: func() {
+								dlg := new(walk.FileDialog)
+								//选择待操作的文件列表
+								//dlg.FilePath = mw.prevFilePath
+								dlg.Filter = "Media Files (*.mp4;*.mpeg;*.mkv;*.wmv;*.avi;*.m4v;*.mov;*.flv;*.rmvb;*.3gp;*.f4v;*.mp3;*.wav;*.aac;*.wma)|*.mp4;*.mpeg;*.mkv;*.wmv;*.avi;*.m4v;*.mov;*.flv;*.rmvb;*.3gp;*.f4v;*.mp3;*.wav;*.aac;*.wma"
+								dlg.Title = "选择待操作的媒体文件"
+
+								ok, err := dlg.ShowOpenMultiple(mw);
+								if err != nil {
+									mw.NewErrormationTips("错误" , err.Error())
+									return
+								}
+								if ok == false {
+									return
+								}
+
+								//校验文件数量
+								if len(dlg.FilePaths) == 0 {
+									return
+								}
+
+								//检测文件列表
+								result , err := VaildateHandleFiles(dlg.FilePaths)
+								if err != nil {
+									mw.NewErrormationTips("错误" , err.Error())
+									return
+								}
+
+								taskFiles.Files = result
+								dropFilesEdit.SetText(strings.Join(result, "\r\n"))
+							},
+						},
+					},
+				},
+				Menu{
 					Text:  "新建",
 					Image: "./data/img/new.png",
 					Items: []MenuItem{
@@ -139,6 +180,7 @@ func main() {
 									appSetings.SrtFileDir = setings.SrtFileDir
 									appSetings.OutputType = setings.OutputType
 									appSetings.SoundTrack = setings.SoundTrack
+									appSetings.CloseNewVersionMessage = setings.CloseNewVersionMessage
 
 									videosrt.SetOutputType( setings.OutputType )
 									videosrt.SetSrtDir( setings.SrtFileDir )
@@ -259,6 +301,7 @@ func main() {
 						ReadOnly: true,
 						Text:     "将需要生成字幕的媒体文件，拖入放到这里\r\n\r\n支持的视频格式：.mp4 , .mpeg , .mkv , .wmv , .avi , .m4v , .mov , .flv , .rmvb , .3gp , .f4v\r\n支持的音频格式：.mp3 , .wav , .aac , .wma",
 						TextColor:walk.RGB(136 , 136 , 136),
+						VScroll:true,
 					},
 					TextEdit{
 						AssignTo: &logText,
@@ -269,112 +312,116 @@ func main() {
 					},
 				},
 			},
-			PushButton{
-				AssignTo: &startBtn,
-				Text: "生成文件",
-				MinSize:Size{500 , 50},
-				OnClicked: func() {
+			HSplitter{
+				Children: []Widget{
+					PushButton{
+						AssignTo: &startBtn,
+						Text: "生成字幕",
+						MinSize:Size{Height:50},
+						OnClicked: func() {
 
-					//设置随机种子
-					tool.SetRandomSeed()
+							//设置随机种子
+							tool.SetRandomSeed()
 
-					tlens := len(taskFiles.Files)
-					if tlens == 0 {
-						mw.NewErrormationTips("错误" , "请先拖入要处理的视频文件")
-						return
-					}
-					ossData := GetCacheAliyunOssData()
-					if ossData.Endpoint == "" {
-						mw.NewErrormationTips("错误" , "请先设置Oss对象配置")
-						return
-					}
-					engineIndex := GetCacheAppSetingsData()
-					if engineIndex.CurrentEngineId == 0 {
-						mw.NewErrormationTips("错误" , "请先新建/选择语音引擎")
-						return
-					}
-					currentEngine , ok := GetEngineById(engineIndex.CurrentEngineId)
-					if !ok {
-						mw.NewErrormationTips("错误" , "你选择的语音引擎不存在")
-						return
-					}
+							tlens := len(taskFiles.Files)
+							if tlens == 0 {
+								mw.NewErrormationTips("错误" , "请先拖入要处理的视频文件")
+								return
+							}
+							ossData := GetCacheAliyunOssData()
+							if ossData.Endpoint == "" {
+								mw.NewErrormationTips("错误" , "请先设置Oss对象配置")
+								return
+							}
+							engineIndex := GetCacheAppSetingsData()
+							if engineIndex.CurrentEngineId == 0 {
+								mw.NewErrormationTips("错误" , "请先新建/选择语音引擎")
+								return
+							}
+							currentEngine , ok := GetEngineById(engineIndex.CurrentEngineId)
+							if !ok {
+								mw.NewErrormationTips("错误" , "你选择的语音引擎不存在")
+								return
+							}
 
-					//翻译接口设置
-					translateData := GetCacheTranslateSettings()
+							//翻译接口设置
+							translateData := GetCacheTranslateSettings()
 
-					//加载配置
-					videosrt.InitConfig(ossData , currentEngine , translateData)
-					videosrt.SetSrtDir(appSetings.SrtFileDir)
-					videosrt.SetSoundTrack(appSetings.SoundTrack)
-					if appSetings.OutputType != 0 {
-						videosrt.SetOutputType(appSetings.OutputType)
-					}
+							//加载配置
+							videosrt.InitConfig(ossData , currentEngine , translateData)
+							videosrt.SetSrtDir(appSetings.SrtFileDir)
+							videosrt.SetSoundTrack(appSetings.SoundTrack)
+							if appSetings.OutputType != 0 {
+								videosrt.SetOutputType(appSetings.OutputType)
+							}
 
-					multitask.SetVideoSrt(videosrt)
-					//设置队列
-					multitask.SetQueueFile(taskFiles.Files)
+							multitask.SetVideoSrt(videosrt)
+							//设置队列
+							multitask.SetQueueFile(taskFiles.Files)
 
-					var finish = false
+							var finish = false
 
-					startBtn.SetEnabled(false)
-					startBtn.SetText("任务运行中，请勿关闭软件窗口...")
-					//清除log
-					tasklog.ClearLogText()
-					tasklog.AppendLogText("任务开始... \r\n")
+							startBtn.SetEnabled(false)
+							startBtn.SetText("任务运行中，请勿关闭软件窗口...")
+							//清除log
+							tasklog.ClearLogText()
+							tasklog.AppendLogText("任务开始... \r\n")
 
-					//运行
-					multitask.Run()
+							//运行
+							multitask.Run()
 
-					//回调链式执行
-					videosrt.SetFailHandler(func(video string) {
-						//运行下一任务
-						multitask.RunOver()
+							//回调链式执行
+							videosrt.SetFailHandler(func(video string) {
+								//运行下一任务
+								multitask.RunOver()
 
-						//任务完成
-						if ok := multitask.FinishTask(); ok && finish == false {
-							//延迟结束
+								//任务完成
+								if ok := multitask.FinishTask(); ok && finish == false {
+									//延迟结束
+									go func() {
+										time.Sleep(time.Second)
+										finish = true
+										startBtn.SetEnabled(true)
+										startBtn.SetText("生成文件")
+
+										logText.AppendText("\r\n\r\n任务完成！")
+
+										//清空临时目录
+										videosrt.ClearTempDir()
+									}()
+								}
+							})
+							videosrt.SetSuccessHandler(func(video string) {
+								//运行下一任务
+								multitask.RunOver()
+
+								//任务完成
+								if ok := multitask.FinishTask(); ok && finish == false {
+									//延迟结束
+									go func() {
+										time.Sleep(time.Second)
+										finish = true
+										startBtn.SetEnabled(true)
+										startBtn.SetText("生成字幕文件")
+
+										logText.AppendText("\r\n\r\n任务完成！")
+
+										//清空临时目录
+										videosrt.ClearTempDir()
+									}()
+								}
+							})
+
+							//日志输出
 							go func() {
-								time.Sleep(time.Second)
-								finish = true
-								startBtn.SetEnabled(true)
-								startBtn.SetText("生成文件")
-
-								logText.AppendText("\r\n\r\n任务完成！")
-
-								//清空临时目录
-								videosrt.ClearTempDir()
+								for finish == false {
+									logText.SetText("")
+									logText.AppendText(tasklog.GetString())
+									time.Sleep(time.Millisecond * 150)
+								}
 							}()
-						}
-					})
-					videosrt.SetSuccessHandler(func(video string) {
-						//运行下一任务
-						multitask.RunOver()
-
-						//任务完成
-						if ok := multitask.FinishTask(); ok && finish == false {
-							//延迟结束
-							go func() {
-								time.Sleep(time.Second)
-								finish = true
-								startBtn.SetEnabled(true)
-								startBtn.SetText("生成字幕文件")
-
-								logText.AppendText("\r\n\r\n任务完成！")
-
-								//清空临时目录
-								videosrt.ClearTempDir()
-							}()
-						}
-					})
-
-					//日志输出
-					go func() {
-						for finish == false {
-							logText.SetText("")
-							logText.AppendText(tasklog.GetString())
-							time.Sleep(time.Millisecond * 150)
-						}
-					}()
+						},
+					},
 				},
 			},
 		},
@@ -400,6 +447,18 @@ func main() {
 		mw.NewErrormationTips("错误" , "请先下载并安装 ffmpeg 软件，才可以正常使用软件哦")
 		tool.OpenUrl("https://gitee.com/641453620/video-srt")
 		return
+	}
+
+	//尝试校验新版本
+	if appSetings.CloseNewVersionMessage == false {
+		go func() {
+			appV := new(AppVersion)
+			if vtag, e := appV.GetVersion(); e == nil {
+				if vtag != "" && vtag != APP_VERSION {
+					_ = appV.ShowVersionNotifyInfo(vtag , mw)
+				}
+			}
+		}()
 	}
 
 	mw.Run()

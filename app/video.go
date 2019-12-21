@@ -243,7 +243,7 @@ func AliyunAudioRecognition(engine aliyun.AliyunClound , filelink string , intel
 	AudioResult = make(map[int64][] *aliyun.AliyunAudioRecognitionResult)
 
 	//遍历获取识别结果
-	engine.GetAudioFileResult(taskid , client , func(result []byte) {
+	resultError := engine.GetAudioFileResult(taskid , client , func(result []byte) {
 		//mylog.WriteLog( string( result ) )
 
 		//结果处理
@@ -302,6 +302,10 @@ func AliyunAudioRecognition(engine aliyun.AliyunClound , filelink string , intel
 			}
 		}
 	})
+
+	if (resultError != nil) {
+		panic(resultError)
+	}
 
 	return
 }

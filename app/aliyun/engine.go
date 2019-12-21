@@ -163,7 +163,7 @@ func (c AliyunClound) GetAudioFileResult(taskId string , client *sdk.Client , ca
 	}
 
 	if statusText != STATUS_SUCCESS {
-		return errors.New("录音文件识别失败 !")
+		return errors.New("录音文件识别失败 , (" + statusText + ")")
 	}
 
 	return nil

@@ -59,6 +59,7 @@ func(mw *MyMainWindow) RunAppSetingDialog(owner walk.Form , confirmCall func(*Ap
 			Composite{
 				Layout: Grid{Columns: 2},
 				Children: []Widget{
+
 					//输出文件类型
 					Label{
 						Text: "输出文件类型:",
@@ -99,6 +100,15 @@ func(mw *MyMainWindow) RunAppSetingDialog(owner walk.Form , confirmCall func(*Ap
 						ColumnSpan: 2,
 						Text: "说明：\r\n“字幕文件输出目录” 若留空，则默认与媒体文件输出到同一目录下",
 						TextColor:walk.RGB(190 , 190 , 190),
+						MinSize:Size{Height:36},
+					},
+
+
+					Label{
+						Text: "关闭软件新版本提醒:",
+					},
+					CheckBox{
+						Checked: Bind("CloseNewVersionMessage"),
 					},
 				},
 			},
@@ -503,12 +513,12 @@ func (mw *MyMainWindow) RunTranslateSetingDialog(owner walk.Form) {
 
 //打开 Github
 func (mw *MyMainWindow) OpenAboutGithub() {
-	tool.OpenUrl("https://github.com/wxbool/video-srt")
+	tool.OpenUrl("https://github.com/wxbool/video-srt-windows")
 }
 
 //打开 Gitee
 func (mw *MyMainWindow) OpenAboutGitee() {
-	tool.OpenUrl("https://gitee.com/641453620/video-srt")
+	tool.OpenUrl("https://gitee.com/641453620/video-srt-windows")
 }
 
 

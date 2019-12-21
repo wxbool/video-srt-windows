@@ -86,6 +86,8 @@ type AppSetings struct {
 	OutputType int //输出文件类型
 	SrtFileDir string //Srt文件输出目录
 	SoundTrack int //输出音轨
+
+	CloseNewVersionMessage bool //关闭软件新版本提醒（默认开启）
 }
 
 //任务文件列表 - 结构
