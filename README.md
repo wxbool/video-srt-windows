@@ -59,4 +59,4 @@ CLI（命令行）版本：[https://github.com/wxbool/video-srt](https://github.
 <a name="AyJ3E"></a>
 ## 捐赠&支持
 
-![](https://cdn.nlark.com/yuque/0/2019/png/695280/1577103943061-8d389a46-30e2-4f5e-99d3-58f69cbe3ca8.png#align=left&display=inline&height=271&originHeight=382&originWidth=773&size=0&status=done&style=none&width=547)
+![](https://pic2.superbed.cn/item/5e00b93476085c3289dd2dc0.png)
