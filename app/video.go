@@ -24,6 +24,7 @@ type VideoSrt struct {
 	AppDir string //应用根目录
 	SrtDir string //字幕文件输出目录
 	OutputType int //输出文件类型
+	OutputEncode int //输出文件编码
 	SoundTrack int //输出音轨（0输出全部音轨）
 
 	//翻译设置
@@ -45,6 +46,7 @@ func NewApp(appDir string) *VideoSrt {
 	app.TempDir = "temp/audio"
 	app.AppDir = appDir
 	app.OutputType = OUTPUT_SRT
+	app.OutputEncode = OUTPUT_ENCODE_UTF8 //默认输出文件编码
 	return app
 }
 
@@ -77,6 +79,10 @@ func (app *VideoSrt) SetSrtDir(dir string)  {
 
 func (app *VideoSrt) SetOutputType(output int)  {
 	app.OutputType = output
+}
+
+func (app *VideoSrt) SetOutputEncode(encode int)  {
+	app.OutputEncode = encode
 }
 
 func (app *VideoSrt) SetSoundTrack(track int)  {
@@ -349,6 +355,14 @@ func AliyunAudioResultMakeSubtitleFile(app *VideoSrt , video string , AudioResul
 		if e != nil {
 			panic(e)
 		}
+
+		//文件编码分支
+		if app.OutputEncode == OUTPUT_ENCODE_UTF8_BOM {
+			if _, e := file.Write([]byte{0xEF, 0xBB, 0xBF});e != nil {
+				panic(e)
+			}
+		}
+
 		index := 0
 		for _ , data := range result {
 			var linestr string

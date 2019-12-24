@@ -41,6 +41,9 @@ func(mw *MyMainWindow) RunAppSetingDialog(owner walk.Form , confirmCall func(*Ap
 	if setings.OutputType == 0 {
 		setings.OutputType = 1 //默认输出文件类型
 	}
+	if setings.OutputEncode == 0 {
+		setings.OutputEncode = 1; //默认输出文件编码
+	}
 
 	Dialog{
 		AssignTo:      &dlg,
@@ -70,6 +73,18 @@ func(mw *MyMainWindow) RunAppSetingDialog(owner walk.Form , confirmCall func(*Ap
 						DisplayMember: "Name",
 						Model: GetOutputOptionsSelects(),
 					},
+
+					//输出文件编码
+					Label{
+						Text: "输出文件编码:",
+					},
+					ComboBox{
+						Value: Bind("OutputEncode", SelRequired{}),
+						BindingMember: "Id",
+						DisplayMember: "Name",
+						Model: GetOutputEncodeOptionsSelects(),
+					},
+
 
 					Label{
 						Text: "输出音轨：",

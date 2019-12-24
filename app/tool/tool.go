@@ -176,3 +176,44 @@ func Md5String(str string) string {
 	h.Write([]byte(str))
 	return hex.EncodeToString(h.Sum(nil))
 }
+
+
+//版本号比较
+func CompareVersion(version1 string, version2 string) int {
+	v1 := strings.Split(version1, ".")
+	v2 := strings.Split(version2, ".")
+
+	var limit int
+
+	if len(v1) > len(v2) {
+		limit = len(v1)
+	} else {
+		limit = len(v2)
+	}
+
+	for {
+		if len(v1) >= limit {
+			break
+		}
+		v1 = append(v1, "0")
+	}
+
+	for {
+		if len(v2) >= limit {
+			break
+		}
+		v2 = append(v2, "0")
+	}
+
+	for i := 0; i < limit; i++ {
+		num1, _ := strconv.Atoi(v1[i])
+		num2, _ := strconv.Atoi(v2[i])
+		if num1 > num2 {
+			return 1
+		}
+		if num1 < num2 {
+			return -1
+		}
+	}
+	return 0
+}

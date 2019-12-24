@@ -13,7 +13,7 @@ import (
 )
 
 //应用版本号
-const APP_VERSION = "0.2.2"
+const APP_VERSION = "0.2.3"
 
 var AppRootDir string
 var mw *MyMainWindow
@@ -179,10 +179,12 @@ func main() {
 									appSetings.MaxConcurrency = setings.MaxConcurrency
 									appSetings.SrtFileDir = setings.SrtFileDir
 									appSetings.OutputType = setings.OutputType
+									appSetings.OutputEncode = setings.OutputEncode
 									appSetings.SoundTrack = setings.SoundTrack
 									appSetings.CloseNewVersionMessage = setings.CloseNewVersionMessage
 
 									videosrt.SetOutputType( setings.OutputType )
+									videosrt.SetOutputEncode( setings.OutputEncode )
 									videosrt.SetSrtDir( setings.SrtFileDir )
 									videosrt.SetSoundTrack( setings.SoundTrack )
 									multitask.SetMaxConcurrencyNumber( setings.MaxConcurrency )
@@ -206,10 +208,10 @@ func main() {
 							OnTriggered: mw.OpenAboutGitee,
 						},
 						Action{
-							Text:        "最新版本",
+							Text:        "帮助文档",
 							Image:      "./data/img/version.png",
 							OnTriggered: func() {
-								tool.OpenUrl("https://gitee.com/641453620/video-srt-windows/releases")
+								_ = tool.OpenUrl("https://www.yuque.com/viggo-t7cdi/videosrt")
 							},
 						},
 					},
@@ -354,6 +356,9 @@ func main() {
 							if appSetings.OutputType != 0 {
 								videosrt.SetOutputType(appSetings.OutputType)
 							}
+							if appSetings.OutputEncode != 0 {
+								videosrt.SetOutputEncode(appSetings.OutputEncode)
+							}
 
 							multitask.SetVideoSrt(videosrt)
 							//设置队列
@@ -454,7 +459,7 @@ func main() {
 		go func() {
 			appV := new(AppVersion)
 			if vtag, e := appV.GetVersion(); e == nil {
-				if vtag != "" && vtag != APP_VERSION {
+				if vtag != "" && tool.CompareVersion(vtag , APP_VERSION) == 1 {
 					_ = appV.ShowVersionNotifyInfo(vtag , mw)
 				}
 			}

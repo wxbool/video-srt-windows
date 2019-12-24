@@ -16,6 +16,12 @@ const(
 	OUTPUT_STRING = 2 //普通文本
 )
 
+//输出文件编码
+const(
+	OUTPUT_ENCODE_UTF8 = 1 //文件编码 utf-8
+	OUTPUT_ENCODE_UTF8_BOM = 2 //文件编码 utf-8 带 BOM
+)
+
 func init()  {
 	RootDir = GetAppRootDir()
 	if RootDir == "" {
@@ -84,6 +90,7 @@ type AppSetings struct {
 	CurrentEngineId int //目前使用引擎Id
 	MaxConcurrency int //任务最大处理并发数
 	OutputType int //输出文件类型
+	OutputEncode int //输出文件编码
 	SrtFileDir string //Srt文件输出目录
 	SoundTrack int //输出音轨
 
@@ -231,6 +238,14 @@ func GetOutputOptionsSelects() []*OutputSelects {
 	return []*OutputSelects{
 		&OutputSelects{Id:OUTPUT_SRT , Name:"字幕文件"},
 		&OutputSelects{Id:OUTPUT_STRING , Name:"普通文本"},
+	}
+}
+
+//获取 输出文件编码选项列表
+func GetOutputEncodeOptionsSelects() []*OutputSelects {
+	return []*OutputSelects{
+		&OutputSelects{Id:OUTPUT_ENCODE_UTF8 , Name:"UTF-8"},
+		&OutputSelects{Id:OUTPUT_ENCODE_UTF8_BOM , Name:"UTF-8-BOM"},
 	}
 }
 
