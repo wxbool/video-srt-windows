@@ -8,6 +8,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 	"videosrt/app/tool"
 )
 
@@ -557,7 +558,7 @@ func VaildateHandleFiles(files [] string) ([]string , error) {
 			}
 			//校验视频格式后缀
 			ext := path.Ext(f)
-			if !tool.InSliceString(ext , allowExts) {
+			if !tool.InSliceString(strings.ToLower(ext) , allowExts) {
 				return result , errors.New("文件后缀不允许：" + f)
 			}
 			//允许加入
