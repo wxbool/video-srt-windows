@@ -8,7 +8,7 @@
 
 CLI（命令行）版本：[https://github.com/wxbool/video-srt](https://github.com/wxbool/video-srt)
 
-帮助文档：[https://www.yuque.com/viggo-t7cdi/videosrt/nlkh9i](https://www.yuque.com/viggo-t7cdi/videosrt/nlkh9i)
+帮助文档/使用教程：[https://www.yuque.com/viggo-t7cdi/videosrt/nlkh9i](https://www.yuque.com/viggo-t7cdi/videosrt/nlkh9i)
 
 <a name="0b884e4f"></a>
 ## 界面预览
@@ -29,10 +29,10 @@ CLI（命令行）版本：[https://github.com/wxbool/video-srt](https://github.
 ## Download
 
 <a name="e66a66f1"></a>
-##### 下载地址:(v0.2.2)
+##### 下载地址:(v0.2.3)
 
-- .zip（含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.2.2/video-srt-gui-ffmpeg-0.2.2-x64.zip)
-- .zip（不含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.2.2/video-srt-gui-0.2.2-x64.zip)
+- .zip（含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.2.3/video-srt-gui-ffmpeg-0.2.3-x64.zip)
+- .zip（不含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.2.3/video-srt-gui-0.2.3-x64.zip)
 
 你也可以到 [release](https://github.com/wxbool/video-srt-windows/releases) 页面下载其他版本
 
