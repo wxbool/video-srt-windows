@@ -8,12 +8,18 @@
 
 CLI（命令行）版本：[https://github.com/wxbool/video-srt](https://github.com/wxbool/video-srt)
 
-帮助文档/使用教程：[https://www.yuque.com/viggo-t7cdi/videosrt/nlkh9i](https://www.yuque.com/viggo-t7cdi/videosrt/nlkh9i)
+帮助文档/使用教程：[https://www.yuque.com/viggo-t7cdi/videosrt](https://www.yuque.com/viggo-t7cdi/videosrt)
 
 <a name="0b884e4f"></a>
 ## 界面预览
 
 ![](https://cdn.nlark.com/yuque/0/2019/gif/695280/1577093439760-4c4ff7f0-25f9-4bd9-b7fd-b89655564a89.gif#align=left&display=inline&height=440&originHeight=440&originWidth=784&size=0&status=done&style=none&width=784)
+
+## 应用场景
+
+- 识别**视频/音频**的语音生成字幕文件（支持中英互译，双语字幕）
+- 提取**视频/音频**的语音文本
+
 
 <a name="b89d37d3"></a>
 ## 软件优势
