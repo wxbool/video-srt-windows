@@ -65,6 +65,12 @@ type AliyunOssCache struct {
 	aliyun.AliyunOss
 }
 
+//百度翻译账号认证类型选项
+type BaiduAuthTypeSelects struct {
+	Id   int
+	Name string
+}
+
 //软件翻译接口 - 缓存结构
 type TranslateCache struct {
 	translate.BaiduTranslate //百度翻译
@@ -230,6 +236,15 @@ func GetCurrentIndex(data []*EngineSelects , id int) int {
 		}
 	}
 	return -1
+}
+
+
+//获取 百度翻译账号认证类型
+func GetBaiduTranslateAuthenTypeOptionsSelects() []*BaiduAuthTypeSelects {
+	return []*BaiduAuthTypeSelects{
+		&BaiduAuthTypeSelects{Id:translate.ACCOUNT_COMMON_AUTHEN , Name:"标准版"},
+		&BaiduAuthTypeSelects{Id:translate.ACCOUNT_SENIOR_AUTHEN , Name:"高级版"},
+	}
 }
 
 

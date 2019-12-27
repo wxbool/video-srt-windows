@@ -14,6 +14,7 @@ import (
 type BaiduTranslate struct {
 	AppId string //appid
 	AppSecret string //appsecret
+	AuthenType int //账号认证类型
 }
 
 //百度翻译结果集
@@ -29,6 +30,10 @@ type BaiduTranslateResult struct {
 //常量
 const (
 	TRANS_API string = "https://fanyi-api.baidu.com/api/trans/vip/translate"
+
+	//账号认证类型
+	ACCOUNT_COMMON_AUTHEN int = 1 //标准版
+	ACCOUNT_SENIOR_AUTHEN int = 2 //高级版
 )
 
 

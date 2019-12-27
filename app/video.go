@@ -47,6 +47,8 @@ func NewApp(appDir string) *VideoSrt {
 	app.AppDir = appDir
 	app.OutputType = OUTPUT_SRT
 	app.OutputEncode = OUTPUT_ENCODE_UTF8 //默认输出文件编码
+
+	app.BaiduTranslate.AuthenType = translate.ACCOUNT_SENIOR_AUTHEN; //默认百度翻译账号认证类型
 	return app
 }
 
@@ -68,6 +70,9 @@ func (app *VideoSrt) InitConfig(oss *AliyunOssCache , engine *AliyunEngineCache 
 	//translate
 	app.BaiduTranslate.AppId = trans.AppId
 	app.BaiduTranslate.AppSecret = trans.AppSecret
+	if trans.AuthenType != 0 {
+		app.BaiduTranslate.AuthenType = trans.AuthenType
+	}
 	app.AutoTranslation = trans.AutoTranslation
 	app.BilingualSubtitles = trans.BilingualSubtitles
 }
@@ -331,6 +336,10 @@ func AliyunAudioResultMakeSubtitleFile(app *VideoSrt , video string , AudioResul
 	//日志
 	if app.AutoTranslation || app.BilingualSubtitles {
 		app.Log("字幕翻译处理中 ..." , video)
+
+		if app.BaiduTranslate.AuthenType == translate.ACCOUNT_COMMON_AUTHEN {
+			app.Log("你使用的是 “标准版” 账号，翻译速度较慢，请耐心等待 ..." , video)
+		}
 	}
 
 	//根据音轨，输出文件
@@ -377,8 +386,13 @@ func AliyunAudioResultMakeSubtitleFile(app *VideoSrt , video string , AudioResul
 				}
 				datastr = transResult.TransResultDst //译文
 
-				//休眠100毫秒
-				time.Sleep(time.Millisecond * 100)
+				if app.BaiduTranslate.AuthenType == translate.ACCOUNT_COMMON_AUTHEN {
+					//休眠900毫秒
+					time.Sleep(time.Millisecond * 900)
+				} else {
+					//休眠100毫秒
+					time.Sleep(time.Millisecond * 100)
+				}
 			} else {
 				datastr = data.Text
 			}
@@ -429,8 +443,13 @@ func MakeSubtitleText(app *VideoSrt, index int , startTime int64 , endTime int64
 		content.WriteString("\r\n")
 		content.WriteString(other)
 
-		//休眠100毫秒
-		time.Sleep(time.Millisecond * 100)
+		if app.BaiduTranslate.AuthenType == translate.ACCOUNT_COMMON_AUTHEN {
+			//休眠900毫秒
+			time.Sleep(time.Millisecond * 900)
+		} else {
+			//休眠100毫秒
+			time.Sleep(time.Millisecond * 100)
+		}
 	} else {
 		content.WriteString(text)
 	}

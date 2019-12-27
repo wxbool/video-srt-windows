@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 	"videosrt/app/tool"
+	"videosrt/app/translate"
 )
 
 type MyMainWindow struct {
@@ -421,6 +422,10 @@ func (mw *MyMainWindow) RunTranslateSetingDialog(owner walk.Form) {
 
 	translateData = GetCacheTranslateSettings() //查询缓存数据
 
+	if translateData.AuthenType == 0 {
+		translateData.AuthenType = translate.ACCOUNT_SENIOR_AUTHEN //默认账户认证类型
+	}
+
 	Dialog{
 		AssignTo:      &dlg,
 		Title:         "翻译设置",
@@ -459,6 +464,17 @@ func (mw *MyMainWindow) RunTranslateSetingDialog(owner walk.Form) {
 						Text: "翻译接口设置：",
 						TextColor:walk.RGB(190 , 190 , 190),
 						MinSize:Size{Width:100 , Height:20},
+					},
+
+					Label{
+						Text: "账号认证类型：",
+					},
+					ComboBox{
+						ColumnSpan: 3,
+						Value: Bind("AuthenType", SelRequired{}),
+						BindingMember: "Id",
+						DisplayMember: "Name",
+						Model: GetBaiduTranslateAuthenTypeOptionsSelects(),
 					},
 
 					Label{
