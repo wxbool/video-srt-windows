@@ -12,8 +12,9 @@ var oss,translates,engine,setings *datacache.AppCache
 
 //输出文件类型
 const(
-	OUTPUT_SRT = 1 //字幕文件
+	OUTPUT_SRT = 1 //字幕SRT文件
 	OUTPUT_STRING = 2 //普通文本
+	OUTPUT_LRC = 3 //LRC文本
 )
 
 //输出文件编码
@@ -40,7 +41,65 @@ func init()  {
 //设置表单
 type OperateFrom struct {
 	EngineId int
+	
+	OutputSrt bool
+	OutputLrc bool
+	OutputTxt bool
+
+	OutputType int
+	OutputEncode int //输出文件编码
+	SoundTrack int //输出音轨
 }
+
+func (from *OperateFrom) Init(setings *AppSetings)  {
+	if setings.CurrentEngineId != 0 {
+		from.EngineId = setings.CurrentEngineId
+	}
+	if setings.OutputType == 0 {
+		from.OutputType = OUTPUT_SRT
+		from.OutputSrt = true
+	} else {
+		from.OutputType = setings.OutputType
+		if setings.OutputType == OUTPUT_SRT {
+			from.OutputSrt = true
+		}
+		if setings.OutputType == OUTPUT_STRING {
+			from.OutputTxt = true
+		}
+		if setings.OutputType == OUTPUT_LRC {
+			from.OutputLrc = true
+		}
+	}
+	if setings.OutputEncode == 0 {
+		from.OutputEncode = OUTPUT_ENCODE_UTF8 //默认编码
+	} else {
+		from.OutputEncode = setings.OutputEncode
+	}
+	from.SoundTrack = setings.SoundTrack
+}
+
+func (from *OperateFrom) LoadOutputType(t int) {
+	if OUTPUT_SRT != t {
+		from.OutputSrt = false
+	}
+	if OUTPUT_LRC != t {
+		from.OutputLrc = false
+	}
+	if OUTPUT_STRING != t {
+		from.OutputTxt = false
+	}
+
+	if from.OutputSrt {
+		from.OutputType = OUTPUT_SRT
+	} else if from.OutputLrc {
+		from.OutputType = OUTPUT_LRC
+	} else if from.OutputTxt {
+		from.OutputType = OUTPUT_STRING
+	} else {
+		from.OutputType = 0
+	}
+}
+
 
 //引擎选项
 type EngineSelects struct {

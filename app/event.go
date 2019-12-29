@@ -64,40 +64,6 @@ func(mw *MyMainWindow) RunAppSetingDialog(owner walk.Form , confirmCall func(*Ap
 			Composite{
 				Layout: Grid{Columns: 2},
 				Children: []Widget{
-
-					//输出文件类型
-					Label{
-						Text: "输出文件类型:",
-					},
-					ComboBox{
-						Value: Bind("OutputType", SelRequired{}),
-						BindingMember: "Id",
-						DisplayMember: "Name",
-						Model: GetOutputOptionsSelects(),
-					},
-
-					//输出文件编码
-					Label{
-						Text: "输出文件编码:",
-					},
-					ComboBox{
-						Value: Bind("OutputEncode", SelRequired{}),
-						BindingMember: "Id",
-						DisplayMember: "Name",
-						Model: GetOutputEncodeOptionsSelects(),
-					},
-
-
-					Label{
-						Text: "输出音轨：",
-					},
-					ComboBox{
-						Value: Bind("SoundTrack", SelRequired{}),
-						BindingMember: "Id",
-						DisplayMember: "Name",
-						Model: GetSoundTrackSelects(),
-					},
-
 					Label{
 						Text: "任务处理并发数：",
 					},

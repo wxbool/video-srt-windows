@@ -6,6 +6,7 @@ import (
 	"os"
 	"path"
 	"strconv"
+	"strings"
 	"time"
 	"videosrt/app/aliyun"
 	"videosrt/app/ffmpeg"
@@ -154,10 +155,10 @@ func (app *VideoSrt) Run(video string) {
 	}()
 
 	//智能分段校验
-	if app.OutputType == OUTPUT_SRT {
-		app.IntelligentBlock = true
-	} else {
+	if app.OutputType == OUTPUT_STRING {
 		app.IntelligentBlock = false //非输出字幕文件 关闭智能分段
+	} else {
+		app.IntelligentBlock = true
 	}
 
 	if video == "" {
@@ -356,8 +357,10 @@ func AliyunAudioResultMakeSubtitleFile(app *VideoSrt , video string , AudioResul
 		//输出文件类型
 		if app.OutputType == OUTPUT_SRT {
 			thisfile += ".srt"
-		} else {
+		} else if app.OutputType == OUTPUT_STRING {
 			thisfile += ".txt"
+		} else if app.OutputType == OUTPUT_LRC {
+			thisfile += ".lrc"
 		}
 
 		file, e := os.Create(thisfile)
@@ -370,6 +373,11 @@ func AliyunAudioResultMakeSubtitleFile(app *VideoSrt , video string , AudioResul
 			if _, e := file.Write([]byte{0xEF, 0xBB, 0xBF});e != nil {
 				panic(e)
 			}
+		}
+
+		//歌词头
+		if app.OutputType == OUTPUT_LRC {
+			_,_ = file.WriteString("[ar:]\r\n[ti:]\r\n[al:]\r\n[by:]\r\n")
 		}
 
 		index := 0
@@ -397,17 +405,23 @@ func AliyunAudioResultMakeSubtitleFile(app *VideoSrt , video string , AudioResul
 				datastr = data.Text
 			}
 
+			datastr = strings.TrimSpace(datastr)
+
 			//拼接文本
 			if app.OutputType == OUTPUT_SRT {
 				linestr = MakeSubtitleText(app , index , data.BeginTime , data.EndTime , datastr , app.BilingualSubtitles)
-			} else {
+			} else if app.OutputType == OUTPUT_STRING {
 				linestr = MakeText(index , data.BeginTime , data.EndTime , datastr)
+			} else if app.OutputType == OUTPUT_LRC {
+				linestr = MakeMusicLrcText(index , data.BeginTime , data.EndTime , datastr)
 			}
+
 			if _, e = file.WriteString(linestr);e != nil {
 				panic(e)
 			}
 			index++
 		}
+
 		//close
 		_ = file.Close()
 	}
@@ -419,9 +433,9 @@ func MakeSubtitleText(app *VideoSrt, index int , startTime int64 , endTime int64
 	var content bytes.Buffer
 	content.WriteString(strconv.Itoa(index))
 	content.WriteString("\r\n")
-	content.WriteString(tool.SubtitleTimeMillisecond(startTime))
+	content.WriteString(tool.SubtitleTimeMillisecond(startTime , true))
 	content.WriteString(" --> ")
-	content.WriteString(tool.SubtitleTimeMillisecond(endTime))
+	content.WriteString(tool.SubtitleTimeMillisecond(endTime , true))
 	content.WriteString("\r\n")
 
 	//双语字幕
@@ -460,11 +474,23 @@ func MakeSubtitleText(app *VideoSrt, index int , startTime int64 , endTime int64
 }
 
 
-//拼接文本
+//拼接文本格式
 func MakeText(index int , startTime int64 , endTime int64 , text string) string {
 	var content bytes.Buffer
 	content.WriteString(text)
 	content.WriteString("\r\n")
+	content.WriteString("\r\n")
+	return content.String()
+}
+
+
+//拼接歌词文本
+func MakeMusicLrcText(index int , startTime int64 , endTime int64 , text string) string {
+	var content bytes.Buffer
+	content.WriteString("[")
+	content.WriteString(tool.MusicLrcTextMillisecond(startTime))
+	content.WriteString("]")
+	content.WriteString(text)
 	content.WriteString("\r\n")
 	return content.String()
 }
