@@ -13,7 +13,7 @@ CLI（命令行）版本：[https://github.com/wxbool/video-srt](https://github.
 <a name="0b884e4f"></a>
 ## 界面预览
 
-![](https://cdn.nlark.com/yuque/0/2019/gif/695280/1577093439760-4c4ff7f0-25f9-4bd9-b7fd-b89655564a89.gif#align=left&display=inline&height=440&originHeight=440&originWidth=784&size=0&status=done&style=none&width=784)
+![](https://ae01.alicdn.com/kf/H8b8aef18541046f8b98aa8fd8907596eO.gif)
 
 ## 应用场景
 
@@ -28,17 +28,17 @@ CLI（命令行）版本：[https://github.com/wxbool/video-srt](https://github.
 - 视频识别无需上传原视频，方便且节省时间
 - 支持多任务多文件批量处理
 - 支持视频、音频常见多种格式文件
-- 支持输出字幕文件、普通文本两种类型
+- 支持输出字幕SRT文件、LRC文件、普通文本3种类型
 - 支持字幕中英互译、双语字幕输出
 
 <a name="Download"></a>
 ## Download
 
 <a name="e66a66f1"></a>
-##### 下载地址:(v0.2.5)
+##### 下载地址:(v0.2.6)
 
-- .zip（含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.2.5/video-srt-gui-ffmpeg-0.2.5-x64.zip)
-- .zip（不含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.2.5/video-srt-gui-0.2.5-x64.zip)
+- .zip（含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.2.6/video-srt-gui-ffmpeg-0.2.6-x64.zip)
+- .zip（不含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.2.6/video-srt-gui-0.2.6-x64.zip)
 
 你也可以到 [release](https://github.com/wxbool/video-srt-windows/releases) 页面下载其他版本
 
