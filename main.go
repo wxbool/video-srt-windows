@@ -24,8 +24,7 @@ var (
 	outputTxtChecked *walk.CheckBox
 )
 
-
-func init()  {
+func init() {
 	//设置可同时执行的最大CPU数
 	runtime.GOMAXPROCS(runtime.NumCPU())
 	//MY Window
@@ -42,7 +41,6 @@ func init()  {
 		ffmpeg.VailTempFfmpegLibrary(AppRootDir)
 	}
 }
-
 
 func main() {
 	var taskFiles = new(TaskHandleFile)
@@ -71,7 +69,7 @@ func main() {
 		//fmt.Println("\r\n")
 		//fmt.Println("\r\n")
 		//fmt.Println("\r\n")
-		strs := strings.Join([]string{"【" , baseName , "】" , s} , "")
+		strs := strings.Join([]string{"【", baseName, "】", s}, "")
 		//追加日志
 		tasklog.AppendLogText(strs)
 	})
@@ -83,18 +81,18 @@ func main() {
 
 	if err := (MainWindow{
 		AssignTo: &mw.MainWindow,
-		Icon:"./data/img/index.png",
+		Icon:     "./data/img/index.png",
 		Title:    "VideoSrt - 识别视频语音生成字幕文件的小工具" + " - " + APP_VERSION,
 		ToolBar: ToolBar{
 			ButtonStyle: ToolBarButtonImageBeforeText,
 			Items: []MenuItem{
 				Menu{
-					Text:"打开",
+					Text:  "打开",
 					Image: "./data/img/open.png",
 					Items: []MenuItem{
 						Action{
-							Image:  "./data/img/media.png",
-							Text:   "媒体文件",
+							Image: "./data/img/media.png",
+							Text:  "媒体文件",
 							OnTriggered: func() {
 								dlg := new(walk.FileDialog)
 								//选择待操作的文件列表
@@ -102,9 +100,9 @@ func main() {
 								dlg.Filter = "Media Files (*.mp4;*.mpeg;*.mkv;*.wmv;*.avi;*.m4v;*.mov;*.flv;*.rmvb;*.3gp;*.f4v;*.mp3;*.wav;*.aac;*.wma)|*.mp4;*.mpeg;*.mkv;*.wmv;*.avi;*.m4v;*.mov;*.flv;*.rmvb;*.3gp;*.f4v;*.mp3;*.wav;*.aac;*.wma"
 								dlg.Title = "选择待操作的媒体文件"
 
-								ok, err := dlg.ShowOpenMultiple(mw);
+								ok, err := dlg.ShowOpenMultiple(mw)
 								if err != nil {
-									mw.NewErrormationTips("错误" , err.Error())
+									mw.NewErrormationTips("错误", err.Error())
 									return
 								}
 								if ok == false {
@@ -117,9 +115,9 @@ func main() {
 								}
 
 								//检测文件列表
-								result , err := VaildateHandleFiles(dlg.FilePaths)
+								result, err := VaildateHandleFiles(dlg.FilePaths)
 								if err != nil {
-									mw.NewErrormationTips("错误" , err.Error())
+									mw.NewErrormationTips("错误", err.Error())
 									return
 								}
 
@@ -134,10 +132,10 @@ func main() {
 					Image: "./data/img/new.png",
 					Items: []MenuItem{
 						Action{
-							Image:  "./data/img/voice.png",
-							Text:   "语音引擎",
+							Image: "./data/img/voice.png",
+							Text:  "语音引擎",
 							OnTriggered: func() {
-								mw.RunSpeechEngineSetingDialog(mw , func() {
+								mw.RunSpeechEngineSetingDialog(mw, func() {
 									thisData := GetEngineOtionsSelects()
 									if appSetings.CurrentEngineId == 0 {
 										appSetings.CurrentEngineId = thisData[0].Id
@@ -149,7 +147,7 @@ func main() {
 									//重新加载选项
 									_ = engineOtionsBox.SetModel(thisData)
 									//重置index
-									engIndex := GetCurrentIndex(thisData , appSetings.CurrentEngineId)
+									engIndex := GetCurrentIndex(thisData, appSetings.CurrentEngineId)
 									if engIndex != -1 {
 										_ = engineOtionsBox.SetCurrentIndex(engIndex)
 									}
@@ -164,24 +162,24 @@ func main() {
 					Image: "./data/img/setings.png",
 					Items: []MenuItem{
 						Action{
-							Text:    "OSS对象存储设置",
-							Image:   "./data/img/oss.png",
+							Text:  "OSS对象存储设置",
+							Image: "./data/img/oss.png",
 							OnTriggered: func() {
 								mw.RunObjectStorageSetingDialog(mw)
 							},
 						},
 						Action{
-							Text:    "翻译设置",
-							Image:   "./data/img/translate.png",
+							Text:  "翻译设置",
+							Image: "./data/img/translate.png",
 							OnTriggered: func() {
 								mw.RunTranslateSetingDialog(mw)
 							},
 						},
 						Action{
-							Text:    "软件设置",
-							Image:   "./data/img/app-setings.png",
+							Text:  "软件设置",
+							Image: "./data/img/app-setings.png",
 							OnTriggered: func() {
-								mw.RunAppSetingDialog(mw , func(setings *AppSetings) {
+								mw.RunAppSetingDialog(mw, func(setings *AppSetings) {
 									//更新配置
 									appSetings.MaxConcurrency = setings.MaxConcurrency
 									appSetings.SrtFileDir = setings.SrtFileDir
@@ -193,8 +191,8 @@ func main() {
 									//videosrt.SetSoundTrack( setings.SoundTrack )
 									//videosrt.SetOutputType( setings.OutputType )
 									//videosrt.SetOutputEncode( setings.OutputEncode )
-									videosrt.SetSrtDir( setings.SrtFileDir )
-									multitask.SetMaxConcurrencyNumber( setings.MaxConcurrency )
+									videosrt.SetSrtDir(setings.SrtFileDir)
+									multitask.SetMaxConcurrencyNumber(setings.MaxConcurrency)
 								})
 							},
 						},
@@ -206,17 +204,17 @@ func main() {
 					Items: []MenuItem{
 						Action{
 							Text:        "github",
-							Image:      "./data/img/github.png",
+							Image:       "./data/img/github.png",
 							OnTriggered: mw.OpenAboutGithub,
 						},
 						Action{
 							Text:        "gitee",
-							Image:      "./data/img/gitee.png",
+							Image:       "./data/img/gitee.png",
 							OnTriggered: mw.OpenAboutGitee,
 						},
 						Action{
-							Text:        "帮助文档",
-							Image:      "./data/img/version.png",
+							Text:  "帮助文档",
+							Image: "./data/img/version.png",
 							OnTriggered: func() {
 								_ = tool.OpenUrl("https://www.yuque.com/viggo-t7cdi/videosrt")
 							},
@@ -225,17 +223,17 @@ func main() {
 				},
 			},
 		},
-		Size: Size{800, 530},
+		Size:    Size{800, 530},
 		MinSize: Size{300, 350},
 		Layout:  VBox{},
 		Children: []Widget{
 			HSplitter{
 				Children: []Widget{
 					Composite{
-						MaxSize:Size{Height:31},
+						MaxSize: Size{Height: 31},
 						DataBinder: DataBinder{
-							AssignTo:    &operateEngineDb,
-							DataSource:   operateFrom,
+							AssignTo:   &operateEngineDb,
+							DataSource: operateFrom,
 						},
 						Layout: Grid{Columns: 3},
 						Children: []Widget{
@@ -243,11 +241,11 @@ func main() {
 								Text: "语音引擎：",
 							},
 							ComboBox{
-								AssignTo:&engineOtionsBox,
-								Value: Bind("EngineId", SelRequired{}),
+								AssignTo:      &engineOtionsBox,
+								Value:         Bind("EngineId", SelRequired{}),
 								BindingMember: "Id",
 								DisplayMember: "Name",
-								Model:  GetEngineOtionsSelects(),
+								Model:         GetEngineOtionsSelects(),
 								OnCurrentIndexChanged: func() {
 									_ = operateEngineDb.Submit()
 
@@ -262,25 +260,25 @@ func main() {
 								},
 							},
 							PushButton{
-								Text: "删除引擎",
-								MaxSize:Size{80 , 55},
+								Text:    "删除引擎",
+								MaxSize: Size{80, 55},
 								OnClicked: func() {
-									var thisEngineOptions = make([]*EngineSelects , 0)
+									var thisEngineOptions = make([]*EngineSelects, 0)
 									thisEngineOptions = GetEngineOtionsSelects()
 									//删除校验
 									if appSetings.CurrentEngineId == 0 {
-										mw.NewErrormationTips("错误" , "请先选择要操作的语音引擎")
+										mw.NewErrormationTips("错误", "请先选择要操作的语音引擎")
 										return
 									}
 									if len(thisEngineOptions) <= 1 {
-										mw.NewErrormationTips("错误" , "不允许删除最后一个语音引擎")
+										mw.NewErrormationTips("错误", "不允许删除最后一个语音引擎")
 										return
 									}
 
 									//删除引擎
-									if ok := RemoveCacheAliyunEngineData(appSetings.CurrentEngineId);ok == false {
+									if ok := RemoveCacheAliyunEngineData(appSetings.CurrentEngineId); ok == false {
 										//删除失败
-										mw.NewErrormationTips("错误" , "语音引擎删除失败")
+										mw.NewErrormationTips("错误", "语音引擎删除失败")
 										return
 									}
 
@@ -304,11 +302,11 @@ func main() {
 			},
 
 			HSplitter{
-				Children:[]Widget{
+				Children: []Widget{
 					Composite{
 						DataBinder: DataBinder{
-							AssignTo:    &operateDb,
-							DataSource:   operateFrom,
+							AssignTo:   &operateDb,
+							DataSource: operateFrom,
 						},
 						Layout: Grid{Columns: 4},
 						Children: []Widget{
@@ -316,9 +314,9 @@ func main() {
 								Text: "输出文件：",
 							},
 							CheckBox{
-								AssignTo:&outputSrtChecked,
-								Text:"SRT文件",
-								Checked: Bind("OutputSrt"),
+								AssignTo: &outputSrtChecked,
+								Text:     "SRT文件",
+								Checked:  Bind("OutputSrt"),
 								OnClicked: func() {
 									_ = operateDb.Submit()
 									operateFrom.LoadOutputType(OUTPUT_SRT)
@@ -332,9 +330,9 @@ func main() {
 								},
 							},
 							CheckBox{
-								AssignTo:&outputLrcChecked,
-								Text:"LRC文件",
-								Checked: Bind("OutputLrc"),
+								AssignTo: &outputLrcChecked,
+								Text:     "LRC文件",
+								Checked:  Bind("OutputLrc"),
 								OnClicked: func() {
 									_ = operateDb.Submit()
 									operateFrom.LoadOutputType(OUTPUT_LRC)
@@ -348,9 +346,9 @@ func main() {
 								},
 							},
 							CheckBox{
-								AssignTo:&outputTxtChecked,
-								Text:"普通文本",
-								Checked: Bind("OutputTxt"),
+								AssignTo: &outputTxtChecked,
+								Text:     "普通文本",
+								Checked:  Bind("OutputTxt"),
 								OnClicked: func() {
 									_ = operateDb.Submit()
 									operateFrom.LoadOutputType(OUTPUT_STRING)
@@ -368,12 +366,12 @@ func main() {
 								Text: "输出编码：",
 							},
 							ComboBox{
-								Value: Bind("OutputEncode", SelRequired{}),
+								Value:         Bind("OutputEncode", SelRequired{}),
 								BindingMember: "Id",
 								DisplayMember: "Name",
-								Model: GetOutputEncodeOptionsSelects(),
-								ColumnSpan: 3,
-								MaxSize:Size{Width:80},
+								Model:         GetOutputEncodeOptionsSelects(),
+								ColumnSpan:    3,
+								MaxSize:       Size{Width: 80},
 								OnCurrentIndexChanged: func() {
 									_ = operateDb.Submit()
 									appSetings.OutputEncode = operateFrom.OutputEncode
@@ -386,12 +384,12 @@ func main() {
 								Text: "输出音轨：",
 							},
 							ComboBox{
-								Value: Bind("SoundTrack", SelRequired{}),
+								Value:         Bind("SoundTrack", SelRequired{}),
 								BindingMember: "Id",
 								DisplayMember: "Name",
-								Model: GetSoundTrackSelects(),
-								ColumnSpan: 3,
-								MaxSize:Size{Width:60},
+								Model:         GetSoundTrackSelects(),
+								ColumnSpan:    3,
+								MaxSize:       Size{Width: 60},
 								OnCurrentIndexChanged: func() {
 									_ = operateDb.Submit()
 									appSetings.SoundTrack = operateFrom.SoundTrack
@@ -407,18 +405,19 @@ func main() {
 			HSplitter{
 				Children: []Widget{
 					TextEdit{
-						AssignTo: &dropFilesEdit,
-						ReadOnly: true,
-						Text:     "将需要生成字幕的媒体文件，拖入放到这里\r\n\r\n支持的视频格式：.mp4 , .mpeg , .mkv , .wmv , .avi , .m4v , .mov , .flv , .rmvb , .3gp , .f4v\r\n支持的音频格式：.mp3 , .wav , .aac , .wma",
-						TextColor:walk.RGB(136 , 136 , 136),
-						VScroll:true,
+						AssignTo:  &dropFilesEdit,
+						ReadOnly:  true,
+						Text:      "将需要生成字幕的媒体文件，拖入放到这里\r\n\r\n支持的视频格式：.mp4 , .mpeg , .mkv , .wmv , .avi , .m4v , .mov , .flv , .rmvb , .3gp , .f4v\r\n支持的音频格式：.mp3 , .wav , .aac , .wma",
+						TextColor: walk.RGB(136, 136, 136),
+						VScroll:   true,
 					},
 					TextEdit{
-						AssignTo: &logText,
-						ReadOnly: true,
-						Text:"",
+						AssignTo:  &logText,
+						ReadOnly:  true,
+						Text:      "这里是输出区",
+						TextColor: walk.RGB(136, 136, 136),
 						//HScroll:true,
-						VScroll:true,
+						VScroll: true,
 					},
 				},
 			},
@@ -426,36 +425,73 @@ func main() {
 				Children: []Widget{
 					PushButton{
 						AssignTo: &startBtn,
-						Text: "生成文件",
-						MinSize:Size{Height:50},
+						Text:     "生成文件",
+						MinSize:  Size{Height: 50},
 						OnClicked: func() {
 
 							//设置随机种子
 							tool.SetRandomSeed()
 
 							if operateFrom.OutputType == 0 {
-								mw.NewErrormationTips("错误" , "请选择输出文件类型")
+								mw.NewErrormationTips("错误", "请选择输出文件类型")
 								return
 							}
 
 							tlens := len(taskFiles.Files)
 							if tlens == 0 {
-								mw.NewErrormationTips("错误" , "请先拖入要处理的媒体文件")
+								mw.NewErrormationTips("错误", "请先拖入要处理的媒体文件")
 								return
 							}
 							ossData := GetCacheAliyunOssData()
 							if ossData.Endpoint == "" {
-								mw.NewErrormationTips("错误" , "请先设置Oss对象配置")
+								mw.NewErrormationTips("错误", "请先设置Oss对象配置")
+								mw.RunObjectStorageSetingDialog(mw)
 								return
 							}
 							engineIndex := GetCacheAppSetingsData()
 							if engineIndex.CurrentEngineId == 0 {
-								mw.NewErrormationTips("错误" , "请先新建/选择语音引擎")
+								mw.NewErrormationTips("错误", "请先新建/选择语音引擎")
+								mw.RunSpeechEngineSetingDialog(mw, func() {
+									thisData := GetEngineOtionsSelects()
+									if appSetings.CurrentEngineId == 0 {
+										appSetings.CurrentEngineId = thisData[0].Id
+
+										//更新缓存
+										SetCacheAppSetingsData(appSetings)
+									}
+
+									//重新加载选项
+									_ = engineOtionsBox.SetModel(thisData)
+									//重置index
+									engIndex := GetCurrentIndex(thisData, appSetings.CurrentEngineId)
+									if engIndex != -1 {
+										_ = engineOtionsBox.SetCurrentIndex(engIndex)
+									}
+									operateFrom.EngineId = appSetings.CurrentEngineId
+								})
 								return
 							}
-							currentEngine , ok := GetEngineById(engineIndex.CurrentEngineId)
+							currentEngine, ok := GetEngineById(engineIndex.CurrentEngineId)
 							if !ok {
-								mw.NewErrormationTips("错误" , "你选择的语音引擎不存在")
+								mw.NewErrormationTips("错误", "你选择的语音引擎不存在,请添加语音引擎")
+								mw.RunSpeechEngineSetingDialog(mw, func() {
+									thisData := GetEngineOtionsSelects()
+									if appSetings.CurrentEngineId == 0 {
+										appSetings.CurrentEngineId = thisData[0].Id
+
+										//更新缓存
+										SetCacheAppSetingsData(appSetings)
+									}
+
+									//重新加载选项
+									_ = engineOtionsBox.SetModel(thisData)
+									//重置index
+									engIndex := GetCurrentIndex(thisData, appSetings.CurrentEngineId)
+									if engIndex != -1 {
+										_ = engineOtionsBox.SetCurrentIndex(engIndex)
+									}
+									operateFrom.EngineId = appSetings.CurrentEngineId
+								})
 								return
 							}
 
@@ -463,7 +499,7 @@ func main() {
 							translateData := GetCacheTranslateSettings()
 
 							//加载配置
-							videosrt.InitConfig(ossData , currentEngine , translateData)
+							videosrt.InitConfig(ossData, currentEngine, translateData)
 							videosrt.SetSrtDir(appSetings.SrtFileDir)
 							videosrt.SetSoundTrack(appSetings.SoundTrack)
 
@@ -546,9 +582,9 @@ func main() {
 		},
 		OnDropFiles: func(files []string) {
 			//检测文件列表
-			result , err := VaildateHandleFiles(files)
+			result, err := VaildateHandleFiles(files)
 			if err != nil {
-				mw.NewErrormationTips("错误" , err.Error())
+				mw.NewErrormationTips("错误", err.Error())
 				return
 			}
 
@@ -563,7 +599,7 @@ func main() {
 
 	//校验依赖库
 	if e := ffmpeg.VailFfmpegLibrary(); e != nil {
-		mw.NewErrormationTips("错误" , "请先下载并安装 ffmpeg 软件，才可以正常使用软件哦")
+		mw.NewErrormationTips("错误", "请先下载并安装 ffmpeg 软件，才可以正常使用软件哦")
 		tool.OpenUrl("https://gitee.com/641453620/video-srt")
 		return
 	}
@@ -573,8 +609,8 @@ func main() {
 		go func() {
 			appV := new(AppVersion)
 			if vtag, e := appV.GetVersion(); e == nil {
-				if vtag != "" && tool.CompareVersion(vtag , APP_VERSION) == 1 {
-					_ = appV.ShowVersionNotifyInfo(vtag , mw)
+				if vtag != "" && tool.CompareVersion(vtag, APP_VERSION) == 1 {
+					_ = appV.ShowVersionNotifyInfo(vtag, mw)
 				}
 			}
 		}()
