@@ -1,10 +1,14 @@
 # VideoSrt简介
 
-`VideoSrt` 是用 `Golang`语言，基于 [lxn/walk](https://github.com/lxn/walk) Windows-GUI 工具包开发。
+`VideoSrt` 是使用 `Golang`语言，基于 [lxn/walk](https://github.com/lxn/walk) Windows-GUI 工具包开发的。
 
-这是一个可以识别视频语音自动生成字幕SRT文件的开源软件工具。<br />适用于快速、批量的为视频创建中/英文字幕文件的业务场景。
+这是一个可以识别视频语音自动生成字幕文件的开源软件工具。<br />适用于快速、批量的为视频创建中/英文字幕文件的业务场景。
 
-本项目使用了阿里云的[OSS对象存储](https://www.aliyun.com/product/oss?spm=5176.12825654.eofdhaal5.13.e9392c4aGfj5vj&aly_as=K11FcpO8)、[录音文件识别](https://ai.aliyun.com/nls/filetrans?spm=5176.12061031.1228726.1.47fe3cb43I34mn) 以及 [百度翻译](http://api.fanyi.baidu.com/api/trans/product/index) 的相关业务接口。
+0.2.8版本允许使用以下的接口：
+- 阿里云 [OSS对象存储](https://www.aliyun.com/product/oss?spm=5176.12825654.eofdhaal5.13.e9392c4aGfj5vj&aly_as=K11FcpO8)
+- 阿里云 [录音文件识别](https://ai.aliyun.com/nls/filetrans?spm=5176.12061031.1228726.1.47fe3cb43I34mn) 
+- 百度云 [翻译API](http://api.fanyi.baidu.com/api/trans/product/index) 
+- 腾讯云 [翻译API](https://cloud.tencent.com/product/tmt) 
 
 CLI（命令行）版本：[https://github.com/wxbool/video-srt](https://github.com/wxbool/video-srt)
 
@@ -35,7 +39,7 @@ CLI（命令行）版本：[https://github.com/wxbool/video-srt](https://github.
 ## Download
 
 <a name="e66a66f1"></a>
-##### 下载地址:(v0.2.6)
+##### 下载地址:(v0.2.8)
 
 - .zip（含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.2.6/video-srt-gui-ffmpeg-0.2.6-x64.zip)
 - .zip（不含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.2.6/video-srt-gui-0.2.6-x64.zip)
@@ -46,7 +50,7 @@ CLI（命令行）版本：[https://github.com/wxbool/video-srt](https://github.
 ## 注意事项
 
 - 软件目录下的 `data`目录为数据存储目录，请勿删除。否则可能会导致配置丢失
-- 项目使用了 [ffmpeg](http://ffmpeg.org/) 依赖，除非您的电脑已经安装了`ffmpeg`环境，否则请下载包含`ffmpeg`依赖的软件包
+- 项目使用了 [ffmpeg](http://ffmpeg.org/) 依赖，除非您的电脑已经安装了`ffmpeg`环境，否则请下载包含`ffmpeg`依赖的软件包并放到ffmpeg文件夹中。
 
 <a name="9a751511"></a>
 ## 升级说明
@@ -55,6 +59,17 @@ CLI（命令行）版本：[https://github.com/wxbool/video-srt](https://github.
 - 然后用旧版本软件的 `data` 文件夹覆盖新版软件的 `data` 文件夹
 
 <a name="f3dc992e"></a>
+
+## FAQ
+##### 1.为什么Linux和Mac不能用？
+因为videosrt的GUI是使用[lxn/walk](https://github.com/lxn/walk)开发的，只支持制作Windows端的GUI，如果您想在Linux上使用，可以体验[CLI版本](https://github.com/wxbool/video-srt)
+##### 2.使用此软件会产生费用吗？
+如果您适量使用本软件（各个API的免费使用额度可以自行查询），将不会产生费用。
+如果您大量使用，建议根据自己的情况购买各个平台的套餐。
+##### 3.难受，为什么我一直报错？
+报错的原因有很多，各API也会报错。如果您遇到麻烦，建议加入QQ群[109695078](https://jq.qq.com/?_wv=1027&k=5Eco2hO)与我们交流。
+也可以看看这个报错合集[正在做]()
+
 ## 交流&联系
 
 - QQ：2012210812
