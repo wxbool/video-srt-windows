@@ -1,1 +1,12 @@
+# FAQ_videosrt内部常见问题
+> By EldersJavas
+
+> 错误还在收集中，如果您遇到问题并未出现在本页（无论是否解决），请及时到群[109695078](https://jq.qq.com/?_wv=1027&k=5Eco2hO)中告诉我们！
+
+## 常见错误
+- ###### EOF报错
+视频转音频的过程出现错误，绝大多数是视频问题。
+- ###### 无FFmpeg
+项目使用了 [ffmpeg](http://ffmpeg.org/) ，请将`FFmpeg.exe`放到`ffmpeg`文件夹中。
+### 如果还是无法解决请到QQ群中询问，群号[109695078](https://jq.qq.com/?_wv=1027&k=5Eco2hO)
 
