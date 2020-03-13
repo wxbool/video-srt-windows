@@ -4,7 +4,11 @@
 
 这是一个可以识别视频语音自动生成字幕SRT文件的开源软件工具。<br />适用于快速、批量的为视频创建中/英文字幕文件的业务场景。
 
-本项目使用了阿里云的[OSS对象存储](https://www.aliyun.com/product/oss?spm=5176.12825654.eofdhaal5.13.e9392c4aGfj5vj&aly_as=K11FcpO8)、[录音文件识别](https://ai.aliyun.com/nls/filetrans?spm=5176.12061031.1228726.1.47fe3cb43I34mn) 以及 [百度翻译](http://api.fanyi.baidu.com/api/trans/product/index) 的相关业务接口。
+0.2.8 版本将会使用以下接口：
+- 阿里云 [OSS对象存储](https://www.aliyun.com/product/oss?spm=5176.12825654.eofdhaal5.13.e9392c4aGfj5vj&aly_as=K11FcpO8)
+- 阿里云 [录音文件识别](https://ai.aliyun.com/nls/filetrans?spm=5176.12061031.1228726.1.47fe3cb43I34mn) 
+- 百度翻译开放平台 [翻译API](http://api.fanyi.baidu.com/api/trans/product/index) 
+- 腾讯云 [翻译API](https://cloud.tencent.com/product/tmt) 
 
 CLI（命令行）版本：[https://github.com/wxbool/video-srt](https://github.com/wxbool/video-srt)
 
@@ -13,7 +17,7 @@ CLI（命令行）版本：[https://github.com/wxbool/video-srt](https://github.
 <a name="0b884e4f"></a>
 ## 界面预览
 
-![](https://ae01.alicdn.com/kf/H8b8aef18541046f8b98aa8fd8907596eO.gif)
+![](https://i.postimg.cc/nhSgmn4r/GIF.gif)
 
 ## 应用场景
 
@@ -30,15 +34,17 @@ CLI（命令行）版本：[https://github.com/wxbool/video-srt](https://github.
 - 支持视频、音频常见多种格式文件
 - 支持输出字幕SRT文件、LRC文件、普通文本3种类型
 - 支持字幕中英互译、双语字幕输出
+- 支持多翻译引擎（百度翻译、腾讯云翻译）
 
 <a name="Download"></a>
 ## Download
 
 <a name="e66a66f1"></a>
-##### 下载地址:(v0.2.6)
-
-- .zip（含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.2.6/video-srt-gui-ffmpeg-0.2.6-x64.zip)
-- .zip（不含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.2.6/video-srt-gui-0.2.6-x64.zip)
+##### 下载地址:
+- (v0.2.8)（含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.2.8/video-srt-gui-ffmpeg-0.2.8-x64.zip)
+- (v0.2.8)（不含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.2.8/video-srt-gui-0.2.8-x64.zip)
+- (v0.2.6)（含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.2.6/video-srt-gui-ffmpeg-0.2.6-x64.zip)
+- (v0.2.6)（不含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.2.6/video-srt-gui-0.2.6-x64.zip)
 
 你也可以到 [release](https://github.com/wxbool/video-srt-windows/releases) 页面下载其他版本
 
@@ -53,6 +59,19 @@ CLI（命令行）版本：[https://github.com/wxbool/video-srt](https://github.
 
 - 先下载最新版本的软件包
 - 然后用旧版本软件的 `data` 文件夹覆盖新版软件的 `data` 文件夹
+- 0.2.8 版本，翻译设置无法直接兼容低版本，需要手动创建翻译引擎来使用翻译功能
+
+## FAQ
+##### 1.为什么Linux和Mac不能用？
+因为`VideoSrt`的GUI是使用[lxn/walk](https://github.com/lxn/walk)开发的，仅支持Windows的GUI，如果您想在Linux上使用，可以体验[CLI版本](https://github.com/wxbool/video-srt)
+
+##### 2.使用此软件会产生费用吗？
+如果您适量使用本软件（各个API的免费使用额度可以自行查询），将不会产生费用。
+如果您大量使用，建议根据自己的情况购买各个平台的资源包，以满足需求。
+
+##### 3.难受，为什么我一直报错？
+报错的原因有很多，软件配置错误、阿里云、腾讯云等账户权限问题都可能会导致软件显示错误。如果您遇到麻烦，建议加入QQ群 [109695078](https://jq.qq.com/?_wv=1027&k=5Eco2hO) 与我们交流。
+
 
 <a name="f3dc992e"></a>
 ## 交流&联系

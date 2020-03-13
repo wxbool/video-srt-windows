@@ -40,7 +40,8 @@ const (
 //百度api文档
 //http://api.fanyi.baidu.com/api/trans/product/apidoc
 //支持语言列表 http://api.fanyi.baidu.com/api/trans/product/apidoc#languageList
-func (trans *BaiduTranslate) Translate (strings string , from string , to string) (*BaiduTranslateResult , error) {
+func (trans *BaiduTranslate) TranslateBaidu (strings string , from string , to string) (*BaiduTranslateResult , error) {
+
 	params := &url.Values{}
 
 	params.Add("q" , strings)
@@ -100,7 +101,7 @@ func (trans *BaiduTranslate) CallRequest (params *url.Values ) (*BaiduTranslateR
 
 	//翻译错误校验
 	if result.ErrorCode != 0 {
-		return nil , errors.New("翻译失败 , 错误提示（" + result.ErrorMsg + "）")
+		return nil , errors.New(result.ErrorMsg)
 	}
 
 	return result,nil

@@ -6,6 +6,7 @@ import (
 	"strings"
 	"unicode"
 	"unicode/utf8"
+	"videosrt/app/tool"
 )
 
 
@@ -101,23 +102,42 @@ func AliyunAudioResultWordHandle(result [] byte , callback func (vresult *Aliyun
 
 		var ischinese = IsChineseWords(value) //校验中文
 
+		var chineseNumberWordIndexs []int
+		var chineseNumberDiffLength int = 0
+
 		for i , word := range value {
 			if blockBool || i == 0 {
 				beginTime = word.BeginTime
 				blockBool = false
 			}
 
+			if ischinese && block == "" {
+				chineseNumberWordIndexs = []int{}
+				chineseNumberDiffLength = 0
+			}
+
 			if ischinese {
 				block += word.Word
+				if tool.IsChineseNumber(word.Word) && FindSliceIntCount(chineseNumberWordIndexs , i) == 0 {
+					cl := tool.ChineseNumberToLowercaseLength(word.Word)
+
+					if (cl - utf8.RuneCountInString(word.Word)) > 0 {
+						chineseNumberDiffLength += (cl - utf8.RuneCountInString(word.Word))
+						chineseNumberWordIndexs = append(chineseNumberWordIndexs , i)
+					}
+				}
 			} else {
 				block += CompleSpace(word.Word) //补全空格
 			}
+
 			blockRune = utf8.RuneCountInString(block)
+			//fmt.Println("chineseNumberDiffLength : " , chineseNumberWordIndexs , chineseNumberDiffLength , word.Word)
 
 			for channel , p := range audioResult {
 				if word.ChannelId != channel {
 					continue
 				}
+
 				for windex , w := range p {
 
 					if (word.BeginTime >= w.BeginTime && word.EndTime <= w.EndTime) || ((word.BeginTime < w.EndTime && word.EndTime > w.EndTime) && (FindSliceIntCount(w.Blocks , -1) != len(w.Blocks))) {
@@ -125,14 +145,15 @@ func AliyunAudioResultWordHandle(result [] byte , callback func (vresult *Aliyun
 						early := false
 
 						for t , B := range w.Blocks{
-							if (blockRune >= B) && B != -1 {
+							//fmt.Println("blockRune : " , blockRune , B , word.Word)
+							if ((blockRune >= B) || (blockRune + chineseNumberDiffLength >= B)) && B != -1 {
 								flag = true
 
-								//fmt.Println(  block )
-								//fmt.Println(  w.Text )
 								//fmt.Println(  w.Blocks )
 								//fmt.Println(B , lastBlock , (B - lastBlock) , word.Word)
 								//fmt.Println(w.Text)
+								//fmt.Println(  block )
+								//fmt.Println("\n\n\n")
 
 								var thisText = ""
 								//容错机制
@@ -176,7 +197,7 @@ func AliyunAudioResultWordHandle(result [] byte , callback func (vresult *Aliyun
 							}
 						}
 
-						//fmt.Println("word.Word:" , word.Word)
+						//fmt.Println("word.Word : " , word.Word)
 						//fmt.Println(block)
 
 						if FindSliceIntCount(w.Blocks , -1) == len(w.Blocks) {
