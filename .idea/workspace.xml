@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="BranchesTreeState">
+    <expand>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="LOCAL_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+    </expand>
+    <select>
+      <path>
+        <item name="ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="REMOTE_ROOT" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="GROUP_NODE:origin" type="e8cecc67:BranchNodeDescriptor" />
+        <item name="BRANCH:origin/master" type="e8cecc67:BranchNodeDescriptor" />
+      </path>
+    </select>
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="4fe550d3-abe0-4bfa-becc-9c55cf087760" name="默认的" comment="first pull">
+      <change beforePath="$PROJECT_DIR$/app/tool/tool.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/tool/tool.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="GOROOT" path="C:\Go" />
+  <component name="Git.Settings">
+    <excluded-from-favorite>
+      <branch-storage>
+        <map>
+          <entry type="REMOTE">
+            <value>
+              <list>
+                <branch-info repo="$PROJECT_DIR$" source="origin/master" />
+              </list>
+            </value>
+          </entry>
+        </map>
+      </branch-storage>
+    </excluded-from-favorite>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GithubPullRequestsUISettings">
+    <option name="hiddenUrls">
+      <set>
+        <option value="https://github.com/EldersJavas/video-srt-windows.git" />
+      </set>
+    </option>
+  </component>
+  <component name="GoLibraries">
+    <option name="indexEntireGoPath" value="false" />
+    <option name="useGoPathFromSystemEnvironment" value="false" />
+  </component>
+  <component name="ProjectId" id="1Xs6qW4SS9wViIY0dwp1qEeouvm" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="GO_FMT" value="true" />
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="configurable.Global.GOPATH.is.expanded" value="true" />
+    <property name="configurable.Module.GOPATH.is.expanded" value="false" />
+    <property name="configurable.Project.GOPATH.is.expanded" value="true" />
+    <property name="go.import.settings.migrated" value="true" />
+    <property name="go.tried.to.enable.integration.vgo.integrator" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.detected.package.tslint" value="true" />
+    <property name="node.js.path.for.package.eslint" value="project" />
+    <property name="node.js.path.for.package.tslint" value="project" />
+    <property name="node.js.selected.package.eslint" value="(autodetect)" />
+    <property name="node.js.selected.package.tslint" value="(autodetect)" />
+    <property name="settings.editor.selected.configurable" value="vcs.Git" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\admim\GolandProjects\video-srt-windows" />
+      <recent name="C:\Users\admim\GolandProjects" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Go Build.go build">
+    <configuration default="true" type="GoApplicationRunConfiguration" factoryName="Go Application">
+      <module name="video-srt-windows" />
+      <working_directory value="$PROJECT_DIR$/" />
+      <go_parameters value="-i" />
+      <kind value="FILE" />
+      <filePath value="$PROJECT_DIR$/" />
+      <package value="videosrt" />
+      <directory value="$PROJECT_DIR$/" />
+      <method v="2" />
+    </configuration>
+    <configuration name="go build" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true">
+      <module name="video-srt-windows" />
+      <working_directory value="$PROJECT_DIR$" />
+      <kind value="DIRECTORY" />
+      <directory value="$PROJECT_DIR$" />
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="GoTestRunConfiguration" factoryName="Go Test">
+      <module name="video-srt-windows" />
+      <working_directory value="$PROJECT_DIR$/" />
+      <go_parameters value="-i" />
+      <framework value="gotest" />
+      <kind value="DIRECTORY" />
+      <package value="videosrt" />
+      <directory value="$PROJECT_DIR$/" />
+      <filePath value="$PROJECT_DIR$/" />
+      <method v="2" />
+    </configuration>
+    <configuration name="go test video-srt-windows" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="video-srt-windows" />
+      <working_directory value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <kind value="DIRECTORY" />
+      <package value="videosrt" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$/" />
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Go Build.go build" />
+      <item itemvalue="Go Test.go test video-srt-windows" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Go Build.go build" />
+        <item itemvalue="Go Test.go test video-srt-windows" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="4fe550d3-abe0-4bfa-becc-9c55cf087760" name="默认的" comment="" />
+      <created>1581822645387</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1581822645387</updated>
+    </task>
+    <task id="LOCAL-00001" summary="first pull">
+      <created>1581838343024</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1581838343024</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="2" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="CUSTOM_BOOLEAN_PROPERTIES">
+                <map>
+                  <entry key="Show.Git.Branches" value="true" />
+                </map>
+              </option>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="origin/master" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="first pull" />
+    <option name="LAST_COMMIT_MESSAGE" value="first pull" />
+  </component>
+  <component name="VgoProject">
+    <integration-enabled>true</integration-enabled>
+    <proxy>direct</proxy>
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="475" y="27" key="#GOPATH" timestamp="1581833672490">
+      <screen x="0" y="0" width="1366" height="738" />
+    </state>
+    <state x="475" y="27" key="#GOPATH/0.0.1366.738@0.0.1366.738" timestamp="1581833672490" />
+    <state x="475" y="302" key="#GOROOT" timestamp="1581822712782">
+      <screen x="0" y="0" width="1366" height="738" />
+    </state>
+    <state x="475" y="302" key="#GOROOT/0.0.1366.738@0.0.1366.738" timestamp="1581822712782" />
+    <state x="475" y="202" key="#Go_Modules" timestamp="1581822790704">
+      <screen x="0" y="0" width="1366" height="738" />
+    </state>
+    <state x="475" y="202" key="#Go_Modules/0.0.1366.738@0.0.1366.738" timestamp="1581822790704" />
+    <state x="426" y="82" key="#Notifications" timestamp="1581837017050">
+      <screen x="0" y="0" width="1366" height="738" />
+    </state>
+    <state x="426" y="82" key="#Notifications/0.0.1366.738@0.0.1366.738" timestamp="1581837017050" />
+    <state x="426" y="85" key="#Vim_Emulation" timestamp="1581837046697">
+      <screen x="0" y="0" width="1366" height="738" />
+    </state>
+    <state x="426" y="85" key="#Vim_Emulation/0.0.1366.738@0.0.1366.738" timestamp="1581837046697" />
+    <state x="137" y="23" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1581923718596">
+      <screen x="0" y="0" width="1366" height="738" />
+    </state>
+    <state x="137" y="23" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.0.1366.738@0.0.1366.738" timestamp="1581923718596" />
+    <state x="517" y="169" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1581836853507">
+      <screen x="0" y="0" width="1366" height="738" />
+    </state>
+    <state x="517" y="169" key="#com.intellij.fileTypes.FileTypeChooser/0.0.1366.738@0.0.1366.738" timestamp="1581836853507" />
+    <state x="275" y="9" key="#插件" timestamp="1581837147726">
+      <screen x="0" y="0" width="1366" height="738" />
+    </state>
+    <state x="275" y="9" key="#插件/0.0.1366.738@0.0.1366.738" timestamp="1581837147725" />
+    <state x="92" y="92" width="1182" height="554" key="DiffContextDialog" timestamp="1584110984832">
+      <screen x="0" y="0" width="1366" height="738" />
+    </state>
+    <state x="92" y="92" width="1182" height="554" key="DiffContextDialog/0.0.1366.738@0.0.1366.738" timestamp="1584110984832" />
+    <state x="463" y="123" key="FileChooserDialogImpl" timestamp="1584085109058">
+      <screen x="0" y="0" width="1366" height="738" />
+    </state>
+    <state x="463" y="123" key="FileChooserDialogImpl/0.0.1366.738@0.0.1366.738" timestamp="1584085109058" />
+    <state width="287" height="182" key="GridCell.Tab.0.bottom" timestamp="1583411901038">
+      <screen x="0" y="0" width="1366" height="738" />
+    </state>
+    <state width="287" height="182" key="GridCell.Tab.0.bottom/0.0.1366.738@0.0.1366.738" timestamp="1583411901038" />
+    <state width="287" height="182" key="GridCell.Tab.0.center" timestamp="1583411901038">
+      <screen x="0" y="0" width="1366" height="738" />
+    </state>
+    <state width="287" height="182" key="GridCell.Tab.0.center/0.0.1366.738@0.0.1366.738" timestamp="1583411901038" />
+    <state width="287" height="182" key="GridCell.Tab.0.left" timestamp="1583411901038">
+      <screen x="0" y="0" width="1366" height="738" />
+    </state>
+    <state width="287" height="182" key="GridCell.Tab.0.left/0.0.1366.738@0.0.1366.738" timestamp="1583411901038" />
+    <state width="287" height="182" key="GridCell.Tab.0.right" timestamp="1583411901038">
+      <screen x="0" y="0" width="1366" height="738" />
+    </state>
+    <state width="287" height="182" key="GridCell.Tab.0.right/0.0.1366.738@0.0.1366.738" timestamp="1583411901038" />
+    <state width="660" height="226" key="GridCell.Tab.1.bottom" timestamp="1581931283288">
+      <screen x="0" y="0" width="1366" height="738" />
+    </state>
+    <state width="660" height="226" key="GridCell.Tab.1.bottom/0.0.1366.738@0.0.1366.738" timestamp="1581931283288" />
+    <state width="660" height="226" key="GridCell.Tab.1.center" timestamp="1581931283288">
+      <screen x="0" y="0" width="1366" height="738" />
+    </state>
+    <state width="660" height="226" key="GridCell.Tab.1.center/0.0.1366.738@0.0.1366.738" timestamp="1581931283288" />
+    <state width="660" height="226" key="GridCell.Tab.1.left" timestamp="1581931283288">
+      <screen x="0" y="0" width="1366" height="738" />
+    </state>
+    <state width="660" height="226" key="GridCell.Tab.1.left/0.0.1366.738@0.0.1366.738" timestamp="1581931283288" />
+    <state width="660" height="226" key="GridCell.Tab.1.right" timestamp="1581931283288">
+      <screen x="0" y="0" width="1366" height="738" />
+    </state>
+    <state width="660" height="226" key="GridCell.Tab.1.right/0.0.1366.738@0.0.1366.738" timestamp="1581931283288" />
+    <state x="263" y="115" key="IDE.errors.dialog" timestamp="1581836871729">
+      <screen x="0" y="0" width="1366" height="738" />
+    </state>
+    <state x="263" y="115" key="IDE.errors.dialog/0.0.1366.738@0.0.1366.738" timestamp="1581836871729" />
+    <state x="275" y="101" key="Vcs.Push.Dialog.v2" timestamp="1581838649190">
+      <screen x="0" y="0" width="1366" height="738" />
+    </state>
+    <state x="275" y="101" key="Vcs.Push.Dialog.v2/0.0.1366.738@0.0.1366.738" timestamp="1581838649190" />
+    <state x="477" y="281" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1584110984813">
+      <screen x="0" y="0" width="1366" height="738" />
+    </state>
+    <state x="477" y="281" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.0.1366.738@0.0.1366.738" timestamp="1584110984813" />
+  </component>
+</project>
