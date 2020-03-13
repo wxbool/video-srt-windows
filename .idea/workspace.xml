@@ -26,10 +26,7 @@
     </select>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="4fe550d3-abe0-4bfa-becc-9c55cf087760" name="默认的" comment="first pull">
-      <change beforePath="$PROJECT_DIR$/app/tool/tool.go" beforeDir="false" afterPath="$PROJECT_DIR$/app/tool/tool.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/main.go" afterDir="false" />
-    </list>
+    <list default="true" id="4fe550d3-abe0-4bfa-becc-9c55cf087760" name="默认的" comment="first pull" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -158,7 +155,21 @@
       <option name="project" value="LOCAL" />
       <updated>1581838343024</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="first pull">
+      <created>1584111058135</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1584111058135</updated>
+    </task>
+    <task id="LOCAL-00003" summary="first pull">
+      <created>1584111120730</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1584111120730</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
