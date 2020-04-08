@@ -13,7 +13,7 @@ import (
 )
 
 //应用版本号
-const APP_VERSION = "0.2.8"
+const APP_VERSION = "0.2.9"
 
 var AppRootDir string
 var mw *MyMainWindow
@@ -55,7 +55,8 @@ func main() {
 	var operateDb *walk.DataBinder
 	var operateFrom = new(OperateFrom)
 
-	var startBtn *walk.PushButton
+	var startBtn *walk.PushButton //生成字幕Btn
+	var startTranslateBtn *walk.PushButton //字幕翻译Btn
 	var engineOptionsBox *walk.ComboBox
 	var translateEngineOptionsBox *walk.ComboBox
 	var dropFilesEdit *walk.TextEdit
@@ -65,30 +66,42 @@ func main() {
 	//初始化展示配置
 	operateFrom.Init(appSetings)
 
-	var videosrt = NewApp(AppRootDir)
+	//日志
 	var tasklog = NewTasklog()
 
+	//字幕生成应用
+	var videosrt = NewApp(AppRootDir)
 	//注册日志事件
 	videosrt.SetLogHandler(func(s string, video string) {
 		baseName := tool.GetFileBaseName(video)
-		//fmt.Println("日志：" , s , baseName)
-		//fmt.Println("\r\n")
-		//fmt.Println("\r\n")
-		//fmt.Println("\r\n")
 		strs := strings.Join([]string{"【" , baseName , "】" , s} , "")
 		//追加日志
 		tasklog.AppendLogText(strs)
 	})
 	//字幕输出目录
 	videosrt.SetSrtDir(appSetings.SrtFileDir)
-
-	//注册多任务
+	//注册[字幕生成]多任务
 	var multitask = NewVideoMultitask(appSetings.MaxConcurrency)
+
+
+	//字幕翻译应用
+	var srtTranslateApp = NewSrtTranslateApp(AppRootDir)
+	//注册日志回调事件
+	srtTranslateApp.SetLogHandler(func(s string, file string) {
+		baseName := tool.GetFileBaseName(file)
+		strs := strings.Join([]string{"【" , baseName , "】" , s} , "")
+		//追加日志
+		tasklog.AppendLogText(strs)
+	})
+	//文件输出目录
+	srtTranslateApp.SetSrtDir(appSetings.SrtFileDir)
+	//注册[字幕翻译]多任务
+	var srtTranslateMultitask = NewTranslateMultitask(appSetings.MaxConcurrency)
 
 	if err := (MainWindow{
 		AssignTo: &mw.MainWindow,
 		Icon:"./data/img/index.png",
-		Title:    "VideoSrt - 识别视频语音生成字幕文件的小工具" + " - " + APP_VERSION,
+		Title:    "VideoSrt - 一键字幕生成、字幕翻译小工具" + " - " + APP_VERSION,
 		ToolBar: ToolBar{
 			ButtonStyle: ToolBarButtonImageBeforeText,
 			Items: []MenuItem{
@@ -103,7 +116,7 @@ func main() {
 								dlg := new(walk.FileDialog)
 								//选择待操作的文件列表
 								//dlg.FilePath = mw.prevFilePath
-								dlg.Filter = "Media Files (*.mp4;*.mpeg;*.mkv;*.wmv;*.avi;*.m4v;*.mov;*.flv;*.rmvb;*.3gp;*.f4v;*.mp3;*.wav;*.aac;*.wma;*.flac)|*.mp4;*.mpeg;*.mkv;*.wmv;*.avi;*.m4v;*.mov;*.flv;*.rmvb;*.3gp;*.f4v;*.mp3;*.wav;*.aac;*.wma;*.flac"
+								dlg.Filter = "Media Files (*.mp4;*.mpeg;*.mkv;*.wmv;*.avi;*.m4v;*.mov;*.flv;*.rmvb;*.3gp;*.f4v;*.mp3;*.wav;*.aac;*.wma;*.flac;*.m4a;*.srt)|*.mp4;*.mpeg;*.mkv;*.wmv;*.avi;*.m4v;*.mov;*.flv;*.rmvb;*.3gp;*.f4v;*.mp3;*.wav;*.aac;*.wma;*.flac;*.m4a;*.srt"
 								dlg.Title = "选择待操作的媒体文件"
 
 								ok, err := dlg.ShowOpenMultiple(mw);
@@ -121,7 +134,7 @@ func main() {
 								}
 
 								//检测文件列表
-								result , err := VaildateHandleFiles(dlg.FilePaths)
+								result , err := VaildateHandleFiles(dlg.FilePaths , true , true)
 								if err != nil {
 									mw.NewErrormationTips("错误" , err.Error())
 									return
@@ -143,7 +156,10 @@ func main() {
 							OnTriggered: func() {
 								mw.RunSpeechEngineSetingDialog(mw , func() {
 									thisData := Engine.GetEngineOptionsSelects()
-									if appSetings.CurrentEngineId == 0 {
+
+									//校验选择的翻译引擎是否存在
+									_ , ok := Engine.GetEngineById(appSetings.CurrentEngineId)
+									if appSetings.CurrentEngineId == 0 || !ok {
 										appSetings.CurrentEngineId = thisData[0].Id
 
 										//更新缓存
@@ -167,7 +183,10 @@ func main() {
 							OnTriggered: func() {
 								mw.RunBaiduTranslateEngineSetingDialog(mw , func() {
 									thisData := Translate.GetTranslateEngineOptionsSelects()
-									if appSetings.CurrentTranslateEngineId == 0 {
+
+									//校验选择的翻译引擎是否存在
+									_ , ok := Engine.GetEngineById(appSetings.CurrentEngineId)
+									if appSetings.CurrentTranslateEngineId == 0 || !ok {
 										appSetings.CurrentTranslateEngineId = thisData[0].Id
 										//更新缓存
 										Setings.SetCacheAppSetingsData(appSetings)
@@ -228,23 +247,18 @@ func main() {
 									//更新配置
 									appSetings.MaxConcurrency = setings.MaxConcurrency
 									appSetings.SrtFileDir = setings.SrtFileDir
-									//appSetings.OutputType = setings.OutputType
-									//appSetings.OutputEncode = setings.OutputEncode
-									//appSetings.SoundTrack = setings.SoundTrack
 									appSetings.CloseNewVersionMessage = setings.CloseNewVersionMessage
+									appSetings.CloseAutoDeleteOssTempFile = setings.CloseAutoDeleteOssTempFile
 
-									//videosrt.SetSoundTrack( setings.SoundTrack )
-									//videosrt.SetOutputType( setings.OutputType )
-									//videosrt.SetOutputEncode( setings.OutputEncode )
-									videosrt.SetSrtDir( setings.SrtFileDir )
 									multitask.SetMaxConcurrencyNumber( setings.MaxConcurrency )
+									srtTranslateMultitask.SetMaxConcurrencyNumber( setings.MaxConcurrency )
 								})
 							},
 						},
 					},
 				},
 				Menu{
-					Text:  "关于/支持",
+					Text:  "帮助/支持",
 					Image: "./data/img/about.png",
 					Items: []MenuItem{
 						Action{
@@ -258,10 +272,22 @@ func main() {
 							OnTriggered: mw.OpenAboutGitee,
 						},
 						Action{
-							Text:        "帮助文档",
+							Text:        "帮助文本",
 							Image:      "./data/img/version.png",
 							OnTriggered: func() {
 								_ = tool.OpenUrl("https://www.yuque.com/viggo-t7cdi/videosrt")
+							},
+						},
+						Action{
+							Text:        "赞助/打赏",
+							OnTriggered: func() {
+								_ = tool.OpenUrl("https://gitee.com/641453620/video-srt-windows#%E6%8D%90%E8%B5%A0%E6%94%AF%E6%8C%81")
+							},
+						},
+						Action{
+							Text:        "QQ交流群",
+							OnTriggered: func() {
+								_ = tool.OpenUrl("https://gitee.com/641453620/video-srt-windows#%E4%BA%A4%E6%B5%81%E8%81%94%E7%B3%BB")
 							},
 						},
 					},
@@ -439,12 +465,22 @@ func main() {
 							},
 							CheckBox{
 								Text:"双语字幕",
-								ColumnSpan: 2,
 								Checked: Bind("BilingualSubtitleSwitch"),
 								OnClicked: func() {
 									_ = operateTranslateDb.Submit()
 
 									appSetings.BilingualSubtitleSwitch = operateFrom.BilingualSubtitleSwitch
+									//更新缓存
+									Setings.SetCacheAppSetingsData(appSetings)
+								},
+							},
+							CheckBox{
+								Text:"主字幕（输入语言）",
+								Checked: Bind("OutputMainSubtitleInputLanguage"),
+								OnClicked: func() {
+									_ = operateTranslateDb.Submit()
+
+									appSetings.OutputMainSubtitleInputLanguage = operateFrom.OutputMainSubtitleInputLanguage
 									//更新缓存
 									Setings.SetCacheAppSetingsData(appSetings)
 								},
@@ -511,14 +547,10 @@ func main() {
 								OnClicked: func() {
 									_ = operateDb.Submit()
 
-									operateFrom.LoadOutputType(OUTPUT_SRT)
+									operateFrom.OutputType.SRT = operateFrom.OutputSrt
 									appSetings.OutputType = operateFrom.OutputType
 									//更新缓存
 									Setings.SetCacheAppSetingsData(appSetings)
-
-									outputSrtChecked.SetChecked(operateFrom.OutputSrt)
-									outputLrcChecked.SetChecked(operateFrom.OutputLrc)
-									outputTxtChecked.SetChecked(operateFrom.OutputTxt)
 								},
 							},
 							CheckBox{
@@ -527,14 +559,11 @@ func main() {
 								Checked: Bind("OutputLrc"),
 								OnClicked: func() {
 									_ = operateDb.Submit()
-									operateFrom.LoadOutputType(OUTPUT_LRC)
+
+									operateFrom.OutputType.LRC = operateFrom.OutputLrc
 									appSetings.OutputType = operateFrom.OutputType
 									//更新缓存
 									Setings.SetCacheAppSetingsData(appSetings)
-
-									outputSrtChecked.SetChecked(operateFrom.OutputSrt)
-									outputLrcChecked.SetChecked(operateFrom.OutputLrc)
-									outputTxtChecked.SetChecked(operateFrom.OutputTxt)
 								},
 							},
 							CheckBox{
@@ -543,14 +572,11 @@ func main() {
 								Checked: Bind("OutputTxt"),
 								OnClicked: func() {
 									_ = operateDb.Submit()
-									operateFrom.LoadOutputType(OUTPUT_STRING)
+
+									operateFrom.OutputType.TXT = operateFrom.OutputTxt
 									appSetings.OutputType = operateFrom.OutputType
 									//更新缓存
 									Setings.SetCacheAppSetingsData(appSetings)
-
-									outputSrtChecked.SetChecked(operateFrom.OutputSrt)
-									outputLrcChecked.SetChecked(operateFrom.OutputLrc)
-									outputTxtChecked.SetChecked(operateFrom.OutputTxt)
 								},
 							},
 							//输出文件编码
@@ -599,7 +625,7 @@ func main() {
 					TextEdit{
 						AssignTo: &dropFilesEdit,
 						ReadOnly: true,
-						Text:     "将需要生成字幕的媒体文件，拖入放到这里\r\n\r\n支持的视频格式：.mp4 , .mpeg , .mkv , .wmv , .avi , .m4v , .mov , .flv , .rmvb , .3gp , .f4v\r\n支持的音频格式：.mp3 , .wav , .aac , .wma , .flac",
+						Text:     "将需要处理的媒体文件，拖入放到这里\r\n\r\n支持的视频格式：.mp4 , .mpeg , .mkv , .wmv , .avi , .m4v , .mov , .flv , .rmvb , .3gp , .f4v\r\n支持的音频格式：.mp3 , .wav , .aac , .wma , .flac , .m4a\r\n支持的字幕格式：.srt",
 						TextColor:walk.RGB(136 , 136 , 136),
 						VScroll:true,
 					},
@@ -617,21 +643,29 @@ func main() {
 				Children: []Widget{
 					PushButton{
 						AssignTo: &startBtn,
-						Text: "生成文件",
+						Text: "生成字幕",
 						MinSize:Size{Height:50},
 						OnClicked: func() {
-
-							//设置随机种子
-							tool.SetRandomSeed()
-
-							if operateFrom.OutputType == 0 {
-								mw.NewErrormationTips("错误" , "请选择输出文件类型")
-								return
-							}
 
 							tlens := len(taskFiles.Files)
 							if tlens == 0 {
 								mw.NewErrormationTips("错误" , "请先拖入要处理的媒体文件")
+								return
+							}
+							//校验文件列表
+							if _,e := VaildateHandleFiles(taskFiles.Files , true , false); e!=nil {
+								mw.NewErrormationTips("错误" , e.Error())
+								return
+							}
+							//设置随机种子
+							tool.SetRandomSeed()
+
+							//查询应用配置
+							tempAppSetting := Setings.GetCacheAppSetingsData()
+
+							//参数校验
+							if !operateFrom.OutputType.SRT && !operateFrom.OutputType.LRC && !operateFrom.OutputType.TXT {
+								mw.NewErrormationTips("错误" , "至少选择一种输出文件")
 								return
 							}
 							ossData := Oss.GetCacheAliyunOssData()
@@ -639,9 +673,6 @@ func main() {
 								mw.NewErrormationTips("错误" , "请先设置Oss对象配置")
 								return
 							}
-
-							//查询应用配置
-							tempAppSetting := Setings.GetCacheAppSetingsData()
 
 							//查询选择的语音引擎
 							if tempAppSetting.CurrentEngineId == 0 {
@@ -660,6 +691,7 @@ func main() {
 							tempTranslateCfg.BilingualSubtitleSwitch = tempAppSetting.BilingualSubtitleSwitch
 							tempTranslateCfg.InputLanguage = tempAppSetting.InputLanguage
 							tempTranslateCfg.OutputLanguage = tempAppSetting.OutputLanguage
+							tempTranslateCfg.OutputMainSubtitleInputLanguage = tempAppSetting.OutputMainSubtitleInputLanguage
 
 							if tempTranslateCfg.TranslateSwitch {
 								//校验选择的翻译引擎
@@ -687,10 +719,11 @@ func main() {
 							videosrt.SetSrtDir(appSetings.SrtFileDir)
 							videosrt.SetSoundTrack(appSetings.SoundTrack)
 							videosrt.SetMaxConcurrency(appSetings.MaxConcurrency)
+							videosrt.SetCloseAutoDeleteOssTempFile(appSetings.CloseAutoDeleteOssTempFile)
 
-							if appSetings.OutputType != 0 {
-								videosrt.SetOutputType(appSetings.OutputType)
-							}
+							//设置输出文件
+							videosrt.SetOutputType(operateFrom.OutputType)
+							//输出编码
 							if appSetings.OutputEncode != 0 {
 								videosrt.SetOutputEncode(appSetings.OutputEncode)
 							}
@@ -702,6 +735,7 @@ func main() {
 							var finish = false
 
 							startBtn.SetEnabled(false)
+							startTranslateBtn.SetEnabled(false)
 							startBtn.SetText("任务运行中，请勿关闭软件窗口...")
 							//清除log
 							tasklog.ClearLogText()
@@ -722,7 +756,8 @@ func main() {
 										time.Sleep(time.Second)
 										finish = true
 										startBtn.SetEnabled(true)
-										startBtn.SetText("生成文件")
+										startTranslateBtn.SetEnabled(true)
+										startBtn.SetText("生成字幕")
 
 										logText.AppendText("\r\n\r\n任务完成！")
 
@@ -742,7 +777,8 @@ func main() {
 										time.Sleep(time.Second)
 										finish = true
 										startBtn.SetEnabled(true)
-										startBtn.SetText("生成文件")
+										startTranslateBtn.SetEnabled(true)
+										startBtn.SetText("生成字幕")
 
 										logText.AppendText("\r\n\r\n任务完成！")
 
@@ -762,12 +798,146 @@ func main() {
 							}()
 						},
 					},
+
+					PushButton{
+						AssignTo: &startTranslateBtn,
+						Text: "字幕翻译",
+						MinSize:Size{Height:50},
+						OnClicked: func() {
+							//待处理的文件
+							tlens := len(taskFiles.Files)
+							if tlens == 0 {
+								mw.NewErrormationTips("错误" , "请先拖入要处理的字幕文件")
+								return
+							}
+							//校验文件列表
+							if _,e := VaildateHandleFiles(taskFiles.Files , false , true); e!=nil {
+								mw.NewErrormationTips("错误" , e.Error())
+								return
+							}
+
+							//设置随机种子
+							tool.SetRandomSeed()
+
+							//查询应用配置
+							tempAppSetting := Setings.GetCacheAppSetingsData()
+
+							//参数校验
+							if !operateFrom.OutputType.SRT && !operateFrom.OutputType.LRC && !operateFrom.OutputType.TXT {
+								mw.NewErrormationTips("错误" , "至少选择一种输出文件")
+								return
+							}
+
+							//翻译配置
+							tempTranslateCfg := new(SrtTranslateStruct)
+							tempTranslateCfg.TranslateSwitch = tempAppSetting.TranslateSwitch
+							tempTranslateCfg.BilingualSubtitleSwitch = tempAppSetting.BilingualSubtitleSwitch
+							tempTranslateCfg.InputLanguage = tempAppSetting.InputLanguage
+							tempTranslateCfg.OutputLanguage = tempAppSetting.OutputLanguage
+							tempTranslateCfg.OutputMainSubtitleInputLanguage = tempAppSetting.OutputMainSubtitleInputLanguage
+
+							if tempTranslateCfg.TranslateSwitch {
+								//校验选择的翻译引擎
+								if tempAppSetting.CurrentTranslateEngineId == 0 {
+									mw.NewErrormationTips("错误" , "你开启了翻译功能，请先新建/选择翻译引擎")
+									return
+								}
+								currentTranslateEngine , ok := Translate.GetTranslateEngineById(tempAppSetting.CurrentTranslateEngineId)
+								if !ok {
+									mw.NewErrormationTips("错误" , "你选择的翻译引擎不存在")
+									return
+								}
+								if currentTranslateEngine.Supplier == TRANSLATE_SUPPLIER_BAIDU {
+									tempTranslateCfg.BaiduTranslate = currentTranslateEngine.BaiduEngine
+								}
+								if currentTranslateEngine.Supplier == TRANSLATE_SUPPLIER_TENGXUNYUN {
+									tempTranslateCfg.TengxunyunTranslate = currentTranslateEngine.TengxunyunEngine
+								}
+								tempTranslateCfg.Supplier = currentTranslateEngine.Supplier //设置翻译供应商
+							}
+
+							//加载配置
+							srtTranslateApp.InitTranslateConfig(tempTranslateCfg)
+							srtTranslateApp.SetSrtDir(appSetings.SrtFileDir)
+							srtTranslateApp.SetMaxConcurrency(appSetings.MaxConcurrency)
+
+							//设置输出文件
+							srtTranslateApp.SetOutputType(operateFrom.OutputType)
+							//输出编码
+							if appSetings.OutputEncode != 0 {
+								srtTranslateApp.SetOutputEncode(appSetings.OutputEncode)
+							}
+
+							//队列设置
+							srtTranslateMultitask.SetSrtTranslateApp(srtTranslateApp)
+							srtTranslateMultitask.SetQueueFile(taskFiles.Files)
+
+							var finish = false
+
+							startBtn.SetEnabled(false)
+							startTranslateBtn.SetEnabled(false)
+							startTranslateBtn.SetText("任务运行中，请勿关闭软件窗口...")
+							//清除log
+							tasklog.ClearLogText()
+							tasklog.AppendLogText("任务开始... \r\n")
+
+							//运行
+							srtTranslateMultitask.Run()
+
+							//注册回调链式执行
+							srtTranslateApp.SetFailHandler(func(file string) {
+								//运行下一任务
+								srtTranslateMultitask.RunOver()
+
+								//任务完成
+								if ok := srtTranslateMultitask.FinishTask(); ok && finish == false {
+									//延迟结束
+									go func() {
+										time.Sleep(time.Second)
+										finish = true
+										startBtn.SetEnabled(true)
+										startTranslateBtn.SetEnabled(true)
+										startTranslateBtn.SetText("字幕翻译")
+
+										logText.AppendText("\r\n\r\n任务完成！")
+									}()
+								}
+							})
+							srtTranslateApp.SetSuccessHandler(func(video string) {
+								//运行下一任务
+								srtTranslateMultitask.RunOver()
+
+								//任务完成
+								if ok := srtTranslateMultitask.FinishTask(); ok && finish == false {
+									//延迟结束
+									go func() {
+										time.Sleep(time.Second)
+										finish = true
+										startBtn.SetEnabled(true)
+										startTranslateBtn.SetEnabled(true)
+										startTranslateBtn.SetText("字幕翻译")
+
+										logText.AppendText("\r\n\r\n任务完成！")
+									}()
+								}
+							})
+
+							//日志输出
+							go func() {
+								for finish == false {
+									logText.SetText("")
+									logText.AppendText(tasklog.GetString())
+									time.Sleep(time.Millisecond * 150)
+								}
+							}()
+						},
+					},
 				},
 			},
 		},
 		OnDropFiles: func(files []string) {
 			//检测文件列表
-			result , err := VaildateHandleFiles(files)
+			result , err := VaildateHandleFiles(files , true ,true)
 			if err != nil {
 				mw.NewErrormationTips("错误" , err.Error())
 				return

@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"time"
 	"videosrt/app/tool"
 )
 
@@ -68,6 +69,7 @@ func (trans *BaiduTranslate) CallRequest (params *url.Values ) (*BaiduTranslateR
 	if e != nil {
 		return nil,e
 	}
+	http.DefaultClient.Timeout = time.Second * 8
 	//do request
 	response, e := http.DefaultClient.Do(request)
 	if e != nil {

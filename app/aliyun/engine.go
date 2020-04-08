@@ -20,6 +20,7 @@ type AliyunClound struct {
 //阿里云录音文件识别结果集
 type AliyunAudioRecognitionResult struct {
 	Text string //文本结果
+	TranslateText string //翻译文本结果
 	ChannelId int64 //音轨ID
 	BeginTime int64 //该句的起始时间偏移，单位为毫秒
 	EndTime int64 //该句的结束时间偏移，单位为毫秒
@@ -68,6 +69,7 @@ func (c AliyunClound) NewAudioFile(fileLink string) (string , *sdk.Client , erro
 	if err != nil {
 		return "" , client , err
 	}
+	client.SetConnectTimeout(time.Second * 20)
 
 	postRequest := requests.NewCommonRequest()
 	postRequest.Domain = DOMAIN
@@ -116,7 +118,7 @@ func (c AliyunClound) NewAudioFile(fileLink string) (string , *sdk.Client , erro
 		return taskId , client , nil
 	}
 
-	return "" , client , errors.New("录音文件识别请求失败 ! statusText : " + statusText)
+	return "" , client , errors.New("录音文件识别失败 , (" + c.GetErrorStatusTextMessage(statusText) + ")")
 }
 
 
@@ -163,8 +165,32 @@ func (c AliyunClound) GetAudioFileResult(taskId string , client *sdk.Client , ca
 	}
 
 	if statusText != STATUS_SUCCESS {
-		return errors.New("录音文件识别失败 , (" + statusText + ")")
+		return errors.New("录音文件识别失败 , (" + c.GetErrorStatusTextMessage(statusText) + ")")
 	}
 
 	return nil
+}
+
+
+//获取错误信息
+func  (c AliyunClound) GetErrorStatusTextMessage (statusText string) string {
+	var code map[string]string = map[string]string{
+		"USER_BIZDURATION_QUOTA_EXCEED":"单日免费额度超出限制",
+		"FILE_DOWNLOAD_FAILED":"文件访问失败，请检查OSS存储空间访问权限",
+		"FILE_TOO_LARGE":"音频文件超出512MB",
+		"FILE_PARSE_FAILED":"音频文件解析失败，请检查音频文件是否有损坏",
+		"UNSUPPORTED_SAMPLE_RATE":"采样率不匹配",
+		"FILE_TRANS_TASK_EXPIRED":"音频文件识别任务过期，请重试",
+		"REQUEST_INVALID_FILE_URL_VALUE":"音频文件访问失败，请检查OSS存储空间访问权限",
+		"FILE_404_NOT_FOUND":"音频文件访问失败，请检查OSS存储空间访问权限",
+		"FILE_403_FORBIDDEN":"音频文件访问失败，请检查OSS存储空间访问权限",
+		"FILE_SERVER_ERROR":"音频文件访问失败，请检查请求的文件所在的服务是否可用",
+		"INTERNAL_ERROR":"识别内部通用错误，请稍候重试",
+	}
+
+	if _, ok := code[statusText]; ok {
+		return code[statusText]
+	} else {
+		return statusText
+	}
 }

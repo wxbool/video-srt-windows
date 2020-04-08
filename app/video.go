@@ -1,7 +1,6 @@
 package app
 
 import (
-	"bytes"
 	"errors"
 	"github.com/buger/jsonparser"
 	"os"
@@ -22,6 +21,7 @@ type VideoSrtTranslateStruct struct {
 	BilingualSubtitleSwitch bool //是否输出双语字幕
 	InputLanguage int //输入字幕语言
 	OutputLanguage int //输出字幕语言
+	OutputMainSubtitleInputLanguage bool //双语主字幕（输入语言）
 
 	BaiduTranslate translate.BaiduTranslate //百度翻译
 	TengxunyunTranslate translate.TengxunyunTranslate //腾讯云翻译
@@ -41,11 +41,12 @@ type VideoSrt struct {
 	AliyunOss aliyun.AliyunOss //oss
 	AliyunClound aliyun.AliyunClound //语音识别引擎
 
-	IntelligentBlock bool //智能分段处理
+	CloseAutoDeleteOssTempFile bool //关闭自动删除临时音频文件（默认开启）[false开启 true关闭]
+	//IntelligentBlock bool //智能分段处理 [废弃2020.4.7]
 	TempDir string //临时文件目录
 	AppDir string //应用根目录
 	SrtDir string //字幕文件输出目录
-	OutputType int //输出文件类型
+	OutputType *AppSetingsOutput //输出文件类型
 	OutputEncode int //输出文件编码
 	SoundTrack int //输出音轨（0输出全部音轨）
 
@@ -63,10 +64,8 @@ type VideoSrt struct {
 func NewApp(appDir string) *VideoSrt {
 	app := new(VideoSrt)
 
-	app.IntelligentBlock = true
 	app.TempDir = "temp/audio"
 	app.AppDir = appDir
-	app.OutputType = OUTPUT_SRT
 	app.OutputEncode = OUTPUT_ENCODE_UTF8 //默认输出文件编码
 	app.MaxConcurrency = 2
 
@@ -98,11 +97,15 @@ func (app *VideoSrt) InitTranslateConfig (translateSettings *VideoSrtTranslateSt
 }
 
 
+func (app *VideoSrt) SetCloseAutoDeleteOssTempFile(state bool)  {
+	app.CloseAutoDeleteOssTempFile = state
+}
+
 func (app *VideoSrt) SetSrtDir(dir string)  {
 	app.SrtDir = dir
 }
 
-func (app *VideoSrt) SetOutputType(output int)  {
+func (app *VideoSrt) SetOutputType(output *AppSetingsOutput)  {
 	app.OutputType = output
 }
 
@@ -138,6 +141,7 @@ func (app *VideoSrt) Log(s string , v string)  {
 	app.LogHandler(s , v)
 }
 
+
 //清空临时目录
 func (app *VideoSrt) ClearTempDir()  {
 	//临时目录
@@ -172,22 +176,11 @@ func (app *VideoSrt) Run(video string) {
 		}
 	}()
 
-	//智能分段校验
-	if app.OutputType == OUTPUT_STRING {
-		app.IntelligentBlock = false //非输出字幕文件 关闭智能分段
-	} else {
-		app.IntelligentBlock = true
-	}
-
-	if video == "" {
-		panic("enter a video file waiting to be processed .")
-	}
-
 	//校验媒体文件
-	if tool.VaildVideo(video) != true {
-		panic("the input video file does not exist .")
+	if tool.VaildFile(video) != true {
+		panic("媒体文件不存在")
 	}
-	
+
 	tmpAudioDir := app.AppDir + "/" + app.TempDir
 	if !tool.DirExists(tmpAudioDir) {
 		//创建目录
@@ -206,26 +199,48 @@ func (app *VideoSrt) Run(video string) {
 	app.Log("上传音频文件 ..." , video)
 
 	//上传音频至OSS
-	filelink := UploadAudioToClound(app.AliyunOss , tmpAudio)
+	tempfile := UploadAudioToClound(app.AliyunOss , tmpAudio)
 	//获取完整链接
-	filelink = app.AliyunOss.GetObjectFileUrl(filelink)
+	filelink := app.AliyunOss.GetObjectFileUrl(tempfile)
 
 	app.Log("上传文件成功 , 识别中 ..." , video)
 
+	defer func() {
+		//清理oss音频文件
+		if app.CloseAutoDeleteOssTempFile == false {
+			if e := DeleteOssCloundTempAudio(app.AliyunOss , tempfile); e!=nil {
+				app.Log("OSS临时音频清理失败，建议手动删除" , video)
+			} else {
+				app.Log("OSS临时音频清理成功" , video)
+			}
+		}
+	}()
+
 	//阿里云录音文件识别
-	AudioResult := AliyunAudioRecognition(app.AliyunClound, filelink , app.IntelligentBlock)
+	AudioResult , IntelligentBlockResult := AliyunAudioRecognition(app.AliyunClound, filelink)
 
 	app.Log("文件识别成功 , 字幕处理中 ..." , video)
 
-	//输出字幕文件
-	AliyunAudioResultMakeSubtitleFile(app , video , AudioResult)
+	//翻译字幕块
+	AliyunAudioResultTranslate(app , video , AudioResult , IntelligentBlockResult)
+
+	//输出文件
+	if app.OutputType.SRT {
+		AliyunAudioResultMakeSubtitleFile(app , video , OUTPUT_SRT , AudioResult , IntelligentBlockResult)
+	}
+	if app.OutputType.LRC {
+		AliyunAudioResultMakeSubtitleFile(app , video , OUTPUT_LRC , AudioResult , IntelligentBlockResult)
+	}
+	if app.OutputType.TXT {
+		AliyunAudioResultMakeSubtitleFile(app , video , OUTPUT_STRING , AudioResult , IntelligentBlockResult)
+	}
 
 	app.Log("处理完成" , video)
 
 	//删除临时文件
 	if tmpAudio != "" {
 		if remove := os.Remove(tmpAudio); remove != nil {
-			app.Log("错误：删除临时文件失败，请手动删除" , video)
+			app.Log("删除临时文件失败，请手动删除" , video)
 		}
 	}
 
@@ -241,11 +256,11 @@ func (app *VideoSrt) RunTranslate(s string) (*VideoSrtTranslateResult , error) {
 
 	if app.TranslateCfg.Supplier == TRANSLATE_SUPPLIER_BAIDU {
 		if app.TranslateCfg.BaiduTranslate.AuthenType == translate.ACCOUNT_COMMON_AUTHEN { //百度翻译标准版
-			//休眠900毫秒
-			time.Sleep(time.Millisecond * 900)
+			//休眠1010毫秒
+			time.Sleep(time.Millisecond * 1010)
 		} else {
-			//休眠100毫秒
-			time.Sleep(time.Millisecond * 150)
+			//休眠200毫秒
+			time.Sleep(time.Millisecond * 200)
 		}
 
 		from := GetLanguageChar(app.TranslateCfg.InputLanguage , TRANSLATE_SUPPLIER_BAIDU)
@@ -306,15 +321,25 @@ func UploadAudioToClound(target aliyun.AliyunOss , audioFile string) string {
 
 	//上传
 	if file , e := target.UploadFile(audioFile , name); e != nil {
-		panic(e)
+		panic("上传失败：" + e.Error())
 	} else {
 		return file
 	}
 }
 
 
+//清理临时音频文件
+func DeleteOssCloundTempAudio (target aliyun.AliyunOss , objectName string) error {
+	//删除
+	if e := target.DeleteFile(objectName); e != nil {
+		return e
+	}
+	return nil
+}
+
+
 //阿里云录音文件识别
-func AliyunAudioRecognition(engine aliyun.AliyunClound , filelink string , intelligent_block bool) (AudioResult map[int64][] *aliyun.AliyunAudioRecognitionResult) {
+func AliyunAudioRecognition(engine aliyun.AliyunClound , filelink string) (AudioResult map[int64][] *aliyun.AliyunAudioRecognitionResult , IntelligentBlockResult map[int64][] *aliyun.AliyunAudioRecognitionResult) {
 	//创建识别请求
 	taskid, client, e := engine.NewAudioFile(filelink)
 	if e != nil {
@@ -322,6 +347,7 @@ func AliyunAudioRecognition(engine aliyun.AliyunClound , filelink string , intel
 	}
 
 	AudioResult = make(map[int64][] *aliyun.AliyunAudioRecognitionResult)
+	IntelligentBlockResult = make(map[int64][] *aliyun.AliyunAudioRecognitionResult)
 
 	//遍历获取识别结果
 	resultError := engine.GetAudioFileResult(taskid , client , func(result []byte) {
@@ -329,26 +355,24 @@ func AliyunAudioRecognition(engine aliyun.AliyunClound , filelink string , intel
 
 		//结果处理
 		statusText, _ := jsonparser.GetString(result, "StatusText") //结果状态
+
 		if statusText == aliyun.STATUS_SUCCESS {
+			//获取智能分段结果
+			aliyun.AliyunAudioResultWordHandle(result , func(vresult *aliyun.AliyunAudioRecognitionResult) {
+				channelId := vresult.ChannelId
 
-			//智能分段
-			if intelligent_block {
-				aliyun.AliyunAudioResultWordHandle(result , func(vresult *aliyun.AliyunAudioRecognitionResult) {
-					channelId := vresult.ChannelId
+				_ , isPresent  := IntelligentBlockResult[channelId]
+				if isPresent {
+					//追加
+					IntelligentBlockResult[channelId] = append(IntelligentBlockResult[channelId] , vresult)
+				} else {
+					//初始
+					IntelligentBlockResult[channelId] = []*aliyun.AliyunAudioRecognitionResult{}
+					IntelligentBlockResult[channelId] = append(IntelligentBlockResult[channelId] , vresult)
+				}
+			})
 
-					_ , isPresent  := AudioResult[channelId]
-					if isPresent {
-						//追加
-						AudioResult[channelId] = append(AudioResult[channelId] , vresult)
-					} else {
-						//初始
-						AudioResult[channelId] = []*aliyun.AliyunAudioRecognitionResult{}
-						AudioResult[channelId] = append(AudioResult[channelId] , vresult)
-					}
-				})
-				return
-			}
-
+			//获取原始结果
 			_, err := jsonparser.ArrayEach(result, func(value []byte, dataType jsonparser.ValueType, offset int, err error) {
 				text , _ := jsonparser.GetString(value, "Text")
 				channelId , _ := jsonparser.GetInt(value, "ChannelId")
@@ -378,6 +402,7 @@ func AliyunAudioRecognition(engine aliyun.AliyunClound , filelink string , intel
 					AudioResult[channelId] = append(AudioResult[channelId] , vresult)
 				}
 			} , "Result", "Sentences")
+
 			if err != nil {
 				panic(err)
 			}
@@ -392,8 +417,47 @@ func AliyunAudioRecognition(engine aliyun.AliyunClound , filelink string , intel
 }
 
 
+//阿里云识别字幕块翻译处理
+func AliyunAudioResultTranslate(app *VideoSrt , video string , AudioResult map[int64][] *aliyun.AliyunAudioRecognitionResult , IntelligentBlockResult map[int64][] *aliyun.AliyunAudioRecognitionResult)  {
+	//输出日志
+	if app.TranslateCfg.TranslateSwitch {
+		app.Log("字幕翻译处理中 ..." , video)
+
+		//百度翻译标准版
+		if app.TranslateCfg.Supplier == TRANSLATE_SUPPLIER_BAIDU && app.TranslateCfg.BaiduTranslate.AuthenType == translate.ACCOUNT_COMMON_AUTHEN {
+			app.Log("你使用的是 “百度翻译标准版” 账号，翻译速度较慢，请耐心等待 ..." , video)
+		}
+	} else {
+		return
+	}
+
+	if app.OutputType.SRT || app.OutputType.LRC {
+		for _,result := range IntelligentBlockResult {
+			for _ , data := range result {
+				transResult,e := app.RunTranslate(data.Text)
+				if e != nil {
+					panic(e) //终止翻译
+				}
+				data.TranslateText = strings.TrimSpace(transResult.TransResultDst) //译文
+			}
+		}
+	}
+
+	if app.OutputType.TXT {
+		for _,result := range AudioResult {
+			for _ , data := range result {
+				transResult,e := app.RunTranslate(data.Text)
+				if e != nil {
+					panic(e) //终止翻译
+				}
+				data.TranslateText = strings.TrimSpace(transResult.TransResultDst) //译文
+			}
+		}
+	}
+}
+
 //阿里云录音识别结果集生成字幕文件
-func AliyunAudioResultMakeSubtitleFile(app *VideoSrt , video string , AudioResult map[int64][] *aliyun.AliyunAudioRecognitionResult)  {
+func AliyunAudioResultMakeSubtitleFile(app *VideoSrt , video string , outputType int , AudioResult map[int64][] *aliyun.AliyunAudioRecognitionResult , IntelligentBlockResult map[int64][] *aliyun.AliyunAudioRecognitionResult)  {
 	var subfileDir string
 	if app.SrtDir == "" {
 		subfileDir = path.Dir(video)
@@ -403,19 +467,17 @@ func AliyunAudioResultMakeSubtitleFile(app *VideoSrt , video string , AudioResul
 
 	subfile := tool.GetFileBaseName(video)
 
-	//输出日志
-	if app.TranslateCfg.TranslateSwitch {
-		app.Log("字幕翻译处理中 ..." , video)
-
-		//百度翻译标准版
-		if app.TranslateCfg.Supplier == TRANSLATE_SUPPLIER_BAIDU && app.TranslateCfg.BaiduTranslate.AuthenType == translate.ACCOUNT_COMMON_AUTHEN {
-			app.Log("你使用的是 “百度翻译标准版” 账号，翻译速度较慢，请耐心等待 ..." , video)
-		}
+	//注入合适的数据块
+	thisAudioResult := make(map[int64][] *aliyun.AliyunAudioRecognitionResult)
+	if outputType == OUTPUT_SRT || outputType == OUTPUT_LRC {
+		thisAudioResult = IntelligentBlockResult
+	} else if outputType == OUTPUT_STRING {
+		thisAudioResult = AudioResult
 	}
 
-	oneSoundChannel := false //输出单条音轨
+	oneSoundChannel := false //是否输出单条音轨
 	//根据音轨，输出文件
-	for channel,result := range AudioResult {
+	for channel,result := range thisAudioResult {
 		soundChannel := channel + 1
 		if app.SoundTrack != 3 && app.SoundTrack != 0 {
 			oneSoundChannel = true
@@ -433,18 +495,20 @@ func AliyunAudioResultMakeSubtitleFile(app *VideoSrt , video string , AudioResul
 			thisfile = subfileDir + "/" + subfile + "_channel_" +  strconv.FormatInt(soundChannel , 10)
 		}
 		//输出文件类型
-		if app.OutputType == OUTPUT_SRT {
+		if outputType == OUTPUT_SRT {
 			thisfile += ".srt"
-		} else if app.OutputType == OUTPUT_STRING {
+		} else if outputType == OUTPUT_STRING {
 			thisfile += ".txt"
-		} else if app.OutputType == OUTPUT_LRC {
+		} else if outputType == OUTPUT_LRC {
 			thisfile += ".lrc"
 		}
 
+		//创建文件
 		file, e := os.Create(thisfile)
 		if e != nil {
 			panic(e)
 		}
+		defer file.Close()
 
 		//文件编码分支
 		if app.OutputEncode == OUTPUT_ENCODE_UTF8_BOM {
@@ -452,41 +516,41 @@ func AliyunAudioResultMakeSubtitleFile(app *VideoSrt , video string , AudioResul
 				panic(e)
 			}
 		}
-
 		//歌词头
-		if app.OutputType == OUTPUT_LRC {
+		if outputType == OUTPUT_LRC {
 			_,_ = file.WriteString("[ar:]\r\n[ti:]\r\n[al:]\r\n[by:]\r\n")
 		}
+
+
+		bilingualAsc := app.TranslateCfg.OutputMainSubtitleInputLanguage
 
 		index := 0
 		for _ , data := range result {
 			var linestr string
-			var datastr string
 
-			//开启翻译
-			if app.TranslateCfg.TranslateSwitch {
-				//双语字幕
-				if app.TranslateCfg.BilingualSubtitleSwitch && app.OutputType == OUTPUT_SRT {
-					datastr = data.Text
-				} else {
-					transResult,e := app.RunTranslate(data.Text)
-					if e != nil {
-						panic(e) //终止翻译
-					}
-					datastr = transResult.TransResultDst //译文
-				}
-			} else {
-				datastr = data.Text
-			}
-
-			datastr = strings.TrimSpace(datastr)
 			//拼接文本
-			if app.OutputType == OUTPUT_SRT {
-				linestr = MakeSubtitleText(app , index , data.BeginTime , data.EndTime , datastr)
-			} else if app.OutputType == OUTPUT_STRING {
-				linestr = MakeText(index , data.BeginTime , data.EndTime , datastr)
-			} else if app.OutputType == OUTPUT_LRC {
-				linestr = MakeMusicLrcText(index , data.BeginTime , data.EndTime , datastr)
+			if outputType == OUTPUT_SRT {
+				if app.TranslateCfg.TranslateSwitch {
+					if app.TranslateCfg.BilingualSubtitleSwitch {
+						linestr = MakeSubtitleText(index , data.BeginTime , data.EndTime , data.Text , data.TranslateText , true , bilingualAsc)
+					} else {
+						linestr = MakeSubtitleText(index , data.BeginTime , data.EndTime , data.TranslateText , "" , false , true)
+					}
+				} else {
+					linestr = MakeSubtitleText(index , data.BeginTime , data.EndTime , data.Text , "" , false , true)
+				}
+			} else if outputType == OUTPUT_STRING {
+				if app.TranslateCfg.TranslateSwitch {
+					linestr = MakeText(index , data.BeginTime , data.EndTime , data.TranslateText)
+				} else {
+					linestr = MakeText(index , data.BeginTime , data.EndTime , data.Text)
+				}
+			} else if outputType == OUTPUT_LRC {
+				if app.TranslateCfg.TranslateSwitch {
+					linestr = MakeMusicLrcText(index , data.BeginTime , data.EndTime , data.TranslateText)
+				} else {
+					linestr = MakeMusicLrcText(index , data.BeginTime , data.EndTime , data.Text)
+				}
 			}
 
 			if _, e = file.WriteString(linestr);e != nil {
@@ -494,60 +558,5 @@ func AliyunAudioResultMakeSubtitleFile(app *VideoSrt , video string , AudioResul
 			}
 			index++
 		}
-
-		//close
-		_ = file.Close()
 	}
-}
-
-
-//拼接字幕字符串
-func MakeSubtitleText(app *VideoSrt, index int , startTime int64 , endTime int64 , text string) string {
-	var content bytes.Buffer
-	content.WriteString(strconv.Itoa(index))
-	content.WriteString("\r\n")
-	content.WriteString(tool.SubtitleTimeMillisecond(startTime , true))
-	content.WriteString(" --> ")
-	content.WriteString(tool.SubtitleTimeMillisecond(endTime , true))
-	content.WriteString("\r\n")
-
-	//输出双语字幕
-	if app.TranslateCfg.TranslateSwitch && app.TranslateCfg.BilingualSubtitleSwitch {
-		transResult,e := app.RunTranslate(text)
-		if e != nil {
-			panic(e) //终止翻译
-		}
-
-		content.WriteString(transResult.TransResultSrc)
-		content.WriteString("\r\n")
-		content.WriteString(transResult.TransResultDst)
-	} else {
-		content.WriteString(text)
-	}
-
-	content.WriteString("\r\n")
-	content.WriteString("\r\n")
-	return content.String()
-}
-
-
-//拼接文本格式
-func MakeText(index int , startTime int64 , endTime int64 , text string) string {
-	var content bytes.Buffer
-	content.WriteString(text)
-	content.WriteString("\r\n")
-	content.WriteString("\r\n")
-	return content.String()
-}
-
-
-//拼接歌词文本
-func MakeMusicLrcText(index int , startTime int64 , endTime int64 , text string) string {
-	var content bytes.Buffer
-	content.WriteString("[")
-	content.WriteString(tool.MusicLrcTextMillisecond(startTime))
-	content.WriteString("]")
-	content.WriteString(text)
-	content.WriteString("\r\n")
-	return content.String()
 }

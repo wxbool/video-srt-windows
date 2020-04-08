@@ -75,12 +75,13 @@ type OperateFrom struct {
 	BilingualSubtitleSwitch bool //是否输出双语字幕
 	InputLanguage int //输入字幕语言
 	OutputLanguage int //输出字幕语言
+	OutputMainSubtitleInputLanguage bool //双语主字幕（输入语言）
 
 	OutputSrt bool
 	OutputLrc bool
 	OutputTxt bool
 
-	OutputType int
+	OutputType *AppSetingsOutput //输出文件类型
 	OutputEncode int //输出文件编码
 	SoundTrack int //输出音轨
 }
@@ -103,12 +104,18 @@ type LanguageSelects struct {
 	Name string
 }
 
+type AppSetingsOutput struct {
+	SRT bool
+	LRC bool
+	TXT bool
+}
+
 //应用配置 - 缓存结构
 type AppSetings struct {
 	CurrentEngineId int //目前语音引擎Id
 	CurrentTranslateEngineId int //目前翻译引擎Id
 	MaxConcurrency int //任务最大处理并发数
-	OutputType int //输出文件类型
+	OutputType *AppSetingsOutput //输出文件类型
 	OutputEncode int //输出文件编码
 	SrtFileDir string //Srt文件输出目录
 	SoundTrack int //输出音轨
@@ -117,8 +124,10 @@ type AppSetings struct {
 	BilingualSubtitleSwitch bool //是否输出双语字幕
 	InputLanguage int //输入字幕语言
 	OutputLanguage int //输出字幕语言
+	OutputMainSubtitleInputLanguage bool //双语主字幕（输入语言）
 
-	CloseNewVersionMessage bool //关闭软件新版本提醒（默认开启）
+	CloseNewVersionMessage bool //关闭软件新版本提醒（默认开启）[false开启 true关闭]
+	CloseAutoDeleteOssTempFile bool //关闭自动删除临时音频文件（默认开启）[false开启 true关闭]
 }
 
 //任务文件列表 - 结构
@@ -128,32 +137,37 @@ type TaskHandleFile struct {
 
 //根据配置初始化表单
 func (from *OperateFrom) Init(setings *AppSetings)  {
+	from.OutputType = new(AppSetingsOutput)
 	if setings.CurrentEngineId != 0 {
 		from.EngineId = setings.CurrentEngineId
 	}
 	if setings.CurrentTranslateEngineId != 0 {
 		from.TranslateEngineId = setings.CurrentTranslateEngineId
 	}
-	if setings.OutputType == 0 {
-		from.OutputType = OUTPUT_SRT
+
+	if !setings.OutputType.LRC && !setings.OutputType.SRT && !setings.OutputType.TXT {
+		from.OutputType.SRT = true
 		from.OutputSrt = true
 	} else {
 		from.OutputType = setings.OutputType
-		if setings.OutputType == OUTPUT_SRT {
+		if setings.OutputType.SRT {
 			from.OutputSrt = true
 		}
-		if setings.OutputType == OUTPUT_STRING {
+		if setings.OutputType.TXT {
 			from.OutputTxt = true
 		}
-		if setings.OutputType == OUTPUT_LRC {
+		if setings.OutputType.LRC {
 			from.OutputLrc = true
 		}
 	}
+
 	if setings.OutputEncode == 0 {
 		from.OutputEncode = OUTPUT_ENCODE_UTF8 //默认编码
 	} else {
 		from.OutputEncode = setings.OutputEncode
 	}
+
+	from.OutputMainSubtitleInputLanguage = setings.OutputMainSubtitleInputLanguage
 
 	if setings.SoundTrack == 0 {
 		from.SoundTrack = 1 //默认输出音轨一
@@ -175,29 +189,6 @@ func (from *OperateFrom) Init(setings *AppSetings)  {
 
 	from.TranslateSwitch = setings.TranslateSwitch
 	from.BilingualSubtitleSwitch = setings.BilingualSubtitleSwitch
-}
-
-//加载输出类型
-func (from *OperateFrom) LoadOutputType(t int) {
-	if OUTPUT_SRT != t {
-		from.OutputSrt = false
-	}
-	if OUTPUT_LRC != t {
-		from.OutputLrc = false
-	}
-	if OUTPUT_STRING != t {
-		from.OutputTxt = false
-	}
-
-	if from.OutputSrt {
-		from.OutputType = OUTPUT_SRT
-	} else if from.OutputLrc {
-		from.OutputType = OUTPUT_LRC
-	} else if from.OutputTxt {
-		from.OutputType = OUTPUT_STRING
-	} else {
-		from.OutputType = 0
-	}
 }
 
 //获取 输出文件选项列表
@@ -248,6 +239,7 @@ func GetTranslateOutputLanguageOptionsSelects() []*LanguageSelects {
 //获取 应用配置
 func (setings *AppSetingsAppStruct) GetCacheAppSetingsData() *AppSetings {
 	data := new(AppSetings)
+	data.OutputType = new(AppSetingsOutput)
 	vdata := setings.Data.Get(data)
 	if v, ok := vdata.(*AppSetings); ok {
 		return v

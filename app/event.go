@@ -40,12 +40,6 @@ func(mw *MyMainWindow) RunAppSetingDialog(owner walk.Form , confirmCall func(*Ap
 	if seting.MaxConcurrency == 0 {
 		seting.MaxConcurrency = 2 //默认并发数
 	}
-	if seting.OutputType == 0 {
-		seting.OutputType = 1 //默认输出文件类型
-	}
-	if seting.OutputEncode == 0 {
-		seting.OutputEncode = 1; //默认输出文件编码
-	}
 
 	Dialog{
 		AssignTo:      &dlg,
@@ -58,7 +52,7 @@ func(mw *MyMainWindow) RunAppSetingDialog(owner walk.Form , confirmCall func(*Ap
 			DataSource:     seting,
 			ErrorPresenter: ToolTipErrorPresenter{},
 		},
-		MinSize: Size{450, 200},
+		MinSize: Size{450, 220},
 		Layout:  VBox{},
 		Children: []Widget{
 			Composite{
@@ -73,20 +67,25 @@ func(mw *MyMainWindow) RunAppSetingDialog(owner walk.Form , confirmCall func(*Ap
 					},
 
 					Label{
-						Text: "字幕文件输出目录：",
+						Text: "文件输出目录：",
 					},
 					LineEdit{
 						Text: Bind("SrtFileDir"),
 					},
-
 					Label{
 						ColumnSpan: 2,
-						Text: "说明：\r\n“字幕文件输出目录” 若留空，则默认与媒体文件输出到同一目录下",
+						Text: "说明：\r\n“文件输出目录” 若留空，则默认与媒体文件输出到同一目录下",
 						TextColor:walk.RGB(190 , 190 , 190),
-						MinSize:Size{Height:36},
+						MinSize:Size{Height:40},
 					},
 
 
+					Label{
+						Text: "关闭OSS临时文件清理:",
+					},
+					CheckBox{
+						Checked: Bind("CloseAutoDeleteOssTempFile"),
+					},
 					Label{
 						Text: "关闭软件新版本提醒:",
 					},
@@ -609,6 +608,13 @@ func (mw *MyMainWindow) RunObjectStorageSetingDialog(owner walk.Form) {
 								return
 							}
 
+							//去空格
+							oss.Endpoint = strings.TrimSpace(oss.Endpoint)
+							oss.AccessKeyId = strings.TrimSpace(oss.AccessKeyId)
+							oss.AccessKeySecret = strings.TrimSpace(oss.AccessKeySecret)
+							oss.BucketName = strings.TrimSpace(oss.BucketName)
+							oss.BucketDomain = strings.TrimSpace(oss.BucketDomain)
+
 							//设置缓存
 							Oss.SetCacheAliyunOssData(oss)
 
@@ -627,136 +633,6 @@ func (mw *MyMainWindow) RunObjectStorageSetingDialog(owner walk.Form) {
 }
 
 
-//运行 翻译接口设置 Dialog
-//func (mw *MyMainWindow) RunTranslateSetingDialog(owner walk.Form) {
-//	var translateData *TranslateCache
-//	var dlg *walk.Dialog
-//	var db *walk.DataBinder
-//	var acceptPB, cancelPB *walk.PushButton
-//
-//	translateData = data.GetCacheTranslateSettings() //查询缓存数据
-//
-//	if translateData.AuthenType == 0 {
-//		translateData.AuthenType = translate.ACCOUNT_SENIOR_AUTHEN //默认账户认证类型
-//	}
-//
-//	Dialog{
-//		AssignTo:      &dlg,
-//		Title:         "翻译设置",
-//		DefaultButton: &acceptPB,
-//		CancelButton:  &cancelPB,
-//		DataBinder: DataBinder{
-//			AssignTo:       &db,
-//			Name:           "oss",
-//			DataSource:     translateData,
-//			ErrorPresenter: ToolTipErrorPresenter{},
-//		},
-//		MinSize: Size{500, 300},
-//		Layout:  VBox{},
-//		Children: []Widget{
-//			Composite{
-//				Layout: Grid{Columns: 4},
-//				Children: []Widget{
-//
-//					Label{
-//						Text: "中英互译:",
-//					},
-//					CheckBox{
-//						Checked: Bind("AutoTranslation"),
-//					},
-//
-//					Label{
-//						Text: "输出为双语字幕:",
-//					},
-//					CheckBox{
-//						Checked: Bind("BilingualSubtitles"),
-//					},
-//
-//
-//					Label{
-//						ColumnSpan: 4,
-//						Text: "翻译接口设置：",
-//						TextColor:walk.RGB(190 , 190 , 190),
-//						MinSize:Size{Width:100 , Height:20},
-//					},
-//
-//					Label{
-//						Text: "账号认证类型：",
-//					},
-//					ComboBox{
-//						ColumnSpan: 3,
-//						Value: Bind("AuthenType", SelRequired{}),
-//						BindingMember: "Id",
-//						DisplayMember: "Name",
-//						Model: data.GetBaiduTranslateAuthenTypeOptionsSelects(),
-//					},
-//
-//					Label{
-//						Text: "AppId：",
-//					},
-//					LineEdit{
-//						ColumnSpan: 3,
-//						Text: Bind("AppId"),
-//					},
-//
-//					Label{
-//						Text: "AppSecret：",
-//					},
-//					LineEdit{
-//						ColumnSpan: 3,
-//						Text: Bind("AppSecret"),
-//					},
-//
-//					Label{
-//						ColumnSpan: 4,
-//						Text: "说明：\r\n“文本翻译”目前使用的是百度翻译服务，请填写相关的服务配置。",
-//						TextColor:walk.RGB(190 , 190 , 190),
-//						MinSize:Size{Width:150 , Height:60},
-//					},
-//				},
-//			},
-//			Composite{
-//				Layout: HBox{},
-//				Children: []Widget{
-//					HSpacer{},
-//					PushButton{
-//						AssignTo: &acceptPB,
-//						Text:     "保存",
-//						OnClicked: func() {
-//							if err := db.Submit(); err != nil {
-//								log.Fatal(err)
-//								return
-//							}
-//
-//							//参数验证
-//							if (translateData.AppId == "") {
-//								mw.NewInformationTips("提示" , "请填写 AppId")
-//								return
-//							}
-//							if (translateData.AppSecret == "") {
-//								mw.NewInformationTips("提示" , "请填写 AccessKeyId")
-//								return
-//							}
-//
-//							//设置缓存
-//							data.SetCacheTranslateSettings(translateData)
-//
-//							dlg.Accept()
-//						},
-//					},
-//					PushButton{
-//						AssignTo:  &cancelPB,
-//						Text:      "取消",
-//						OnClicked: func() { dlg.Cancel() },
-//					},
-//				},
-//			},
-//		},
-//	}.Run( owner )
-//}
-
-
-
 //打开 Github
 func (mw *MyMainWindow) OpenAboutGithub() {
 	tool.OpenUrl("https://github.com/wxbool/video-srt-windows")
@@ -768,13 +644,23 @@ func (mw *MyMainWindow) OpenAboutGitee() {
 }
 
 
-//校验待处理文件
-func VaildateHandleFiles(files [] string) ([]string , error) {
+//支持的文件后缀校验
+func VaildateHandleFiles(files [] string , mediaExt bool , srtExt bool) ([]string , error) {
 	result := []string{}
-	allowExts := []string{
+	allowExts := []string{}
+	mediaExts := []string{
 		".mp4",".mpeg",".mkv",".wmv",".avi",".m4v",".mov",".flv",".rmvb",".3gp",".f4v",
-		".mp3",".wav",".aac",".wma",".flac",
+		".mp3",".wav",".aac",".wma",".flac",".m4a",
 	}
+	srtExts := []string{".srt"}
+
+	if mediaExt {
+		allowExts = append(allowExts , mediaExts...)
+	}
+	if srtExt {
+		allowExts = append(allowExts , srtExts...)
+	}
+
 	for _,f := range files {
 		f = tool.WinDir(f)
 		if thisFile, err := os.Stat(f); err != nil {

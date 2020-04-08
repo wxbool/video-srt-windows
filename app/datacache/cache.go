@@ -36,7 +36,7 @@ func (app *AppCache) Get(structs interface{}) interface{} {
 		if os.IsNotExist(err) {
 			return structs
 		}
-		panic(err)
+		return data
 	}
 	return data
 }

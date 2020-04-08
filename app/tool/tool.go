@@ -187,8 +187,8 @@ func RepeatStr(str string , s string , length int , before bool) string {
 
 
 //校验文件是否存在
-func VaildVideo (video string) bool {
-	_, err := os.Stat(video)  //os.Stat获取文件信息
+func VaildFile (file string) bool {
+	_, err := os.Stat(file)  //os.Stat获取文件信息
 	if err != nil {
 		if os.IsExist(err) {
 			return true
