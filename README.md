@@ -17,7 +17,7 @@ CLI（命令行）版本：[https://github.com/wxbool/video-srt](https://github.
 <a name="0b884e4f"></a>
 ## 界面预览
 
-![](https://i.postimg.cc/nhSgmn4r/GIF.gif)
+![](https://api.superbed.cn/static/images/2020/04/09/5e8e7938504f4bcb04d3b9e8.gif)
 
 ## 应用场景
 
