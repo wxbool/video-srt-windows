@@ -321,7 +321,7 @@ func UploadAudioToClound(target aliyun.AliyunOss , audioFile string) string {
 
 	//上传
 	if file , e := target.UploadFile(audioFile , name); e != nil {
-		panic("上传失败：" + e.Error())
+		panic(e)
 	} else {
 		return file
 	}

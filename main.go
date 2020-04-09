@@ -673,6 +673,11 @@ func main() {
 								mw.NewErrormationTips("错误" , "请先设置Oss对象配置")
 								return
 							}
+							//校验输入语言
+							if tempAppSetting.InputLanguage != LANGUAGE_ZH && tempAppSetting.InputLanguage != LANGUAGE_EN {
+								mw.NewErrormationTips("错误" , "由于语音提供商的限制，生成字幕的输入语言仅支持中文/英语")
+								return
+							}
 
 							//查询选择的语音引擎
 							if tempAppSetting.CurrentEngineId == 0 {

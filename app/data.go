@@ -222,6 +222,8 @@ func GetTranslateInputLanguageOptionsSelects() []*LanguageSelects {
 	return []*LanguageSelects{
 		&LanguageSelects{Id:LANGUAGE_ZH , Name:"中文"},
 		&LanguageSelects{Id:LANGUAGE_EN , Name:"英文"},
+		&LanguageSelects{Id:LANGUAGE_JP , Name:"日语"},
+		&LanguageSelects{Id:LANGUAGE_KOR , Name:"韩语"},
 	}
 }
 
