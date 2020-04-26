@@ -9,6 +9,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"videosrt/app/aliyun"
 	"videosrt/app/tool"
 	"videosrt/app/translate"
 )
@@ -146,6 +147,8 @@ func(mw *MyMainWindow) RunSpeechEngineSetingDialog(owner walk.Form , confirmCall
 
 	engine = new(AliyunEngineCache)
 
+	engine.Region = aliyun.ALIYUN_CLOUND_REGION_CHA //默认值
+
 	Dialog{
 		AssignTo:      &dlg,
 		Title:         "新建语音引擎",
@@ -189,6 +192,16 @@ func(mw *MyMainWindow) RunSpeechEngineSetingDialog(owner walk.Form , confirmCall
 					},
 					LineEdit{
 						Text: Bind("AccessKeySecret"),
+					},
+
+					Label{
+						Text: "服务区域：",
+					},
+					ComboBox{
+						Value: Bind("Region", SelRequired{}),
+						BindingMember: "Id",
+						DisplayMember: "Name",
+						Model: GetAliyunEngineRegionOptionSelects(),
 					},
 
 					Label{

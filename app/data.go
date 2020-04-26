@@ -303,10 +303,24 @@ type AliyunEngineListCache struct {
 	Engine [] *AliyunEngineCache
 }
 
-//引擎选项
+//语音引擎选项
 type EngineSelects struct {
 	Id   int
 	Name string
+}
+
+//阿里云语音引擎区域选项
+type AliyunEngineRegionSelects struct {
+	Id   int
+	Name string
+}
+
+//获取 阿里云语音引擎区域选项列表
+func GetAliyunEngineRegionOptionSelects() []*BaiduAuthTypeSelects {
+	return []*BaiduAuthTypeSelects{
+		&BaiduAuthTypeSelects{Id:aliyun.ALIYUN_CLOUND_REGION_CHA , Name:"中国"},
+		&BaiduAuthTypeSelects{Id:aliyun.ALIYUN_CLOUND_REGION_INT , Name:"海外"},
+	}
 }
 
 //获取 引擎选项列表

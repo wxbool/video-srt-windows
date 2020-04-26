@@ -1,6 +1,7 @@
 package app
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"os"
@@ -270,41 +271,65 @@ func (app *SrtTranslateApp) SrtOutputFile(file string , srtRows []*SrtRows , out
 		_,_ = fd.WriteString("[ar:]\r\n[ti:]\r\n[al:]\r\n[by:]\r\n")
 	}
 
+	//主字幕
 	bilingualAsc := app.TranslateCfg.OutputMainSubtitleInputLanguage
-
 	index := 0
+
+	//普通文本容器
+	var txtOutputContent bytes.Buffer
+	var txtTransalteOutputContent bytes.Buffer
+
 	for _ , data := range srtRows {
 		var linestr string
 
-		//拼接文本
-		if outputType == OUTPUT_SRT {
-			if app.TranslateCfg.TranslateSwitch {
-				if app.TranslateCfg.BilingualSubtitleSwitch {
-					linestr = MakeSubtitleText(index , data.TimeStartMilliSecond , data.TimeEndMilliSecond , data.Text , data.TranslateText , true , bilingualAsc)
+		//字幕、歌词文件处理
+		if outputType == OUTPUT_SRT || outputType == OUTPUT_LRC {
+			//拼接
+			if outputType == OUTPUT_SRT {
+				if app.TranslateCfg.TranslateSwitch {
+					if app.TranslateCfg.BilingualSubtitleSwitch {
+						linestr = MakeSubtitleText(index , data.TimeStartMilliSecond , data.TimeEndMilliSecond , data.Text , data.TranslateText , true , bilingualAsc)
+					} else {
+						linestr = MakeSubtitleText(index , data.TimeStartMilliSecond , data.TimeEndMilliSecond , data.TranslateText , "" , false , true)
+					}
 				} else {
-					linestr = MakeSubtitleText(index , data.TimeStartMilliSecond , data.TimeEndMilliSecond , data.TranslateText , "" , false , true)
+					linestr = MakeSubtitleText(index , data.TimeStartMilliSecond , data.TimeEndMilliSecond , data.Text , "" , false , true)
 				}
-			} else {
-				linestr = MakeSubtitleText(index , data.TimeStartMilliSecond , data.TimeEndMilliSecond , data.Text , "" , false , true)
+			} else if outputType == OUTPUT_LRC {
+				if app.TranslateCfg.TranslateSwitch {
+					linestr = MakeMusicLrcText(index , data.TimeStartMilliSecond , data.TimeEndMilliSecond , data.TranslateText)
+				} else {
+					linestr = MakeMusicLrcText(index , data.TimeStartMilliSecond , data.TimeEndMilliSecond , data.Text)
+				}
+			}
+
+			//写入行
+			if _, e = fd.WriteString(linestr);e != nil {
+				panic("写入文件失败：" + e.Error())
 			}
 		} else if outputType == OUTPUT_STRING {
+			//普通文本处理
+			txtOutputContent.WriteString(data.Text)
+			txtOutputContent.WriteString("\r\n")
+
 			if app.TranslateCfg.TranslateSwitch {
-				linestr = MakeText(index , data.TimeStartMilliSecond , data.TimeEndMilliSecond , data.TranslateText)
-			} else {
-				linestr = MakeText(index , data.TimeStartMilliSecond , data.TimeEndMilliSecond , data.Text)
-			}
-		} else if outputType == OUTPUT_LRC {
-			if app.TranslateCfg.TranslateSwitch {
-				linestr = MakeMusicLrcText(index , data.TimeStartMilliSecond , data.TimeEndMilliSecond , data.TranslateText)
-			} else {
-				linestr = MakeMusicLrcText(index , data.TimeStartMilliSecond , data.TimeEndMilliSecond , data.Text)
+				txtTransalteOutputContent.WriteString(data.TranslateText)
+				txtTransalteOutputContent.WriteString("\r\n")
 			}
 		}
 
-		if _, e = fd.WriteString(linestr);e != nil {
+		index++
+	}
+
+	//写入文本文件
+	if outputType == OUTPUT_STRING {
+		txtOutputContent.WriteString("\r\n\r\n\r\n\r\n\r\n")
+		if _, e = fd.WriteString(txtOutputContent.String());e != nil {
 			panic("写入文件失败：" + e.Error())
 		}
-		index++
+		if _, e = fd.WriteString(txtTransalteOutputContent.String());e != nil {
+			panic("写入文件失败：" + e.Error())
+		}
 	}
 }
 

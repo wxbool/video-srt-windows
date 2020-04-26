@@ -13,7 +13,7 @@ import (
 )
 
 //应用版本号
-const APP_VERSION = "0.2.9"
+const APP_VERSION = "0.2.9.2"
 
 var AppRootDir string
 var mw *MyMainWindow
@@ -258,7 +258,7 @@ func main() {
 					},
 				},
 				Menu{
-					Text:  "帮助/支持",
+					Text:  "帮助文档/支持",
 					Image: "./data/img/about.png",
 					Items: []MenuItem{
 						Action{
@@ -674,8 +674,8 @@ func main() {
 								return
 							}
 							//校验输入语言
-							if tempAppSetting.InputLanguage != LANGUAGE_ZH && tempAppSetting.InputLanguage != LANGUAGE_EN {
-								mw.NewErrormationTips("错误" , "由于语音提供商的限制，生成字幕的输入语言仅支持中文/英语")
+							if tempAppSetting.InputLanguage == LANGUAGE_KOR {
+								mw.NewErrormationTips("错误" , "由于语音提供商的限制，生成字幕允许的输入语言目前不支持韩语")
 								return
 							}
 
