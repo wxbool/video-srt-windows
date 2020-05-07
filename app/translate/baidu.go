@@ -69,7 +69,7 @@ func (trans *BaiduTranslate) CallRequest (params *url.Values ) (*BaiduTranslateR
 	if e != nil {
 		return nil,e
 	}
-	http.DefaultClient.Timeout = time.Second * 8
+	http.DefaultClient.Timeout = time.Second * 60
 	//do request
 	response, e := http.DefaultClient.Do(request)
 	if e != nil {

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"strconv"
 	"strings"
 	"time"
 	"videosrt/app/parse"
@@ -218,7 +219,7 @@ func (app *SrtTranslateApp) SrtTranslate(file string , srtRows []*SrtRows)  {
 	//翻译处理
 	index := 0
 	for _,data := range srtRows {
-		transResult,e := app.RunTranslate(data.Text)
+		transResult,e := app.RunTranslate(data.Text , file)
 		if e != nil {
 			panic(e) //终止翻译
 		}
@@ -335,7 +336,8 @@ func (app *SrtTranslateApp) SrtOutputFile(file string , srtRows []*SrtRows , out
 
 
 //统一运行翻译结果
-func (app *SrtTranslateApp) RunTranslate(s string) (*SrtTranslateResult , error) {
+func (app *SrtTranslateApp) RunTranslate(s string , file string) (*SrtTranslateResult , error) {
+	var trys int = 0
 	translateResult := new(SrtTranslateResult)
 
 	if app.TranslateCfg.Supplier == TRANSLATE_SUPPLIER_BAIDU {
@@ -350,10 +352,19 @@ func (app *SrtTranslateApp) RunTranslate(s string) (*SrtTranslateResult , error)
 		from := GetLanguageChar(app.TranslateCfg.InputLanguage , TRANSLATE_SUPPLIER_BAIDU)
 		to := GetLanguageChar(app.TranslateCfg.OutputLanguage , TRANSLATE_SUPPLIER_BAIDU)
 
-		baiduResult,e := app.TranslateCfg.BaiduTranslate.TranslateBaidu(s , from , to)
-		if e != nil {
-			return translateResult,errors.New("翻译失败！错误信息：" + e.Error())
+		//发起翻译请求
+		baiduResult,transErr := app.TranslateCfg.BaiduTranslate.TranslateBaidu(s , from , to)
+		for transErr != nil && trys <= 5 {
+			trys++
+			app.Log("翻译请求失败，重试第" + strconv.Itoa(trys) + "次 ..." , file)
+			time.Sleep(time.Second * time.Duration(trys))
+			//重试
+			baiduResult,transErr = app.TranslateCfg.BaiduTranslate.TranslateBaidu(s , from , to)
 		}
+		if transErr != nil {
+			return translateResult,errors.New("翻译失败！错误信息：" + transErr.Error())
+		}
+
 		translateResult.TransResultDst = baiduResult.TransResultDst
 		translateResult.TransResultSrc = baiduResult.TransResultSrc
 		translateResult.From = baiduResult.From
@@ -368,9 +379,17 @@ func (app *SrtTranslateApp) RunTranslate(s string) (*SrtTranslateResult , error)
 		from := GetLanguageChar(app.TranslateCfg.InputLanguage , TRANSLATE_SUPPLIER_TENGXUNYUN)
 		to := GetLanguageChar(app.TranslateCfg.OutputLanguage , TRANSLATE_SUPPLIER_TENGXUNYUN)
 
-		txResult,e := app.TranslateCfg.TengxunyunTranslate.TranslateTengxunyun(s , from , to)
-		if e != nil {
-			return translateResult,errors.New("翻译失败！错误信息：" + e.Error())
+		//发起翻译请求
+		txResult,transErr := app.TranslateCfg.TengxunyunTranslate.TranslateTengxunyun(s , from , to)
+		for transErr != nil && trys <= 5 {
+			trys++
+			app.Log("翻译请求失败，重试第" + strconv.Itoa(trys) + "次 ..." , file)
+			time.Sleep(time.Second * time.Duration(trys))
+			//重试
+			txResult,transErr = app.TranslateCfg.TengxunyunTranslate.TranslateTengxunyun(s , from , to)
+		}
+		if transErr != nil {
+			return translateResult,errors.New("翻译失败！错误信息：" + transErr.Error())
 		}
 
 		translateResult.TransResultDst = txResult.TransResultDst

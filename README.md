@@ -43,8 +43,8 @@ CLI（命令行）版本：[https://github.com/wxbool/video-srt](https://github.
 
 <a name="e66a66f1"></a>
 ##### 下载地址:
-- (v0.2.9.2)（含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.2.9.2/video-srt-gui-ffmpeg-0.2.9.2-x64.zip)
-- (v0.2.9.2)（不含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.2.9.2/video-srt-gui-0.2.9.2-x64.zip)
+- (v0.2.9.5)（含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.2.9.5/video-srt-gui-ffmpeg-0.2.9.5-x64.zip)
+- (v0.2.9.5)（不含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.2.9.5/video-srt-gui-0.2.9.5-x64.zip)
 - (v0.2.6)（含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.2.6/video-srt-gui-ffmpeg-0.2.6-x64.zip)
 - (v0.2.6)（不含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.2.6/video-srt-gui-0.2.6-x64.zip)
 

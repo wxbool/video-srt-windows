@@ -62,7 +62,7 @@ func IsChineseNumber(text string) bool {
 
 
 func ValiChineseNumberChar(s string , unit bool) bool {
-	zh_number := []string{"一","二","三","四","五","六","七","八","九","十"}
+	zh_number := []string{"一","二","两","三","四","五","六","七","八","九","十"}
 	zh_unit := []string{"十","百","千","万","亿"}
 
 	if unit {

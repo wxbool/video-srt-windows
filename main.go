@@ -13,7 +13,7 @@ import (
 )
 
 //应用版本号
-const APP_VERSION = "0.2.9.2"
+const APP_VERSION = "0.2.9.5"
 
 var AppRootDir string
 var mw *MyMainWindow

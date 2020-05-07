@@ -253,13 +253,14 @@ func (app *VideoSrt) Run(video string) {
 
 
 //统一运行翻译结果
-func (app *VideoSrt) RunTranslate(s string) (*VideoSrtTranslateResult , error) {
+func (app *VideoSrt) RunTranslate(s string , file string) (*VideoSrtTranslateResult , error) {
+	var trys int = 0
 	translateResult := new(VideoSrtTranslateResult)
 
 	if app.TranslateCfg.Supplier == TRANSLATE_SUPPLIER_BAIDU {
 		if app.TranslateCfg.BaiduTranslate.AuthenType == translate.ACCOUNT_COMMON_AUTHEN { //百度翻译标准版
 			//休眠1010毫秒
-			time.Sleep(time.Millisecond * 1010)
+			time.Sleep(time.Millisecond * 1050)
 		} else {
 			//休眠200毫秒
 			time.Sleep(time.Millisecond * 200)
@@ -268,10 +269,19 @@ func (app *VideoSrt) RunTranslate(s string) (*VideoSrtTranslateResult , error) {
 		from := GetLanguageChar(app.TranslateCfg.InputLanguage , TRANSLATE_SUPPLIER_BAIDU)
 		to := GetLanguageChar(app.TranslateCfg.OutputLanguage , TRANSLATE_SUPPLIER_BAIDU)
 
-		baiduResult,e := app.TranslateCfg.BaiduTranslate.TranslateBaidu(s , from , to)
-		if e != nil {
-			return translateResult,errors.New("翻译失败！错误信息：" + e.Error())
+		//发起翻译请求
+		baiduResult,transErr := app.TranslateCfg.BaiduTranslate.TranslateBaidu(s , from , to)
+		for transErr != nil && trys <= 5 {
+			trys++
+			app.Log("翻译请求失败，重试第" + strconv.Itoa(trys) + "次 ..." , file)
+			time.Sleep(time.Second * time.Duration(trys))
+			//重试
+			baiduResult,transErr = app.TranslateCfg.BaiduTranslate.TranslateBaidu(s , from , to)
 		}
+		if transErr != nil {
+			return translateResult,errors.New("翻译失败！错误信息：" + transErr.Error())
+		}
+
 		translateResult.TransResultDst = baiduResult.TransResultDst
 		translateResult.TransResultSrc = baiduResult.TransResultSrc
 		translateResult.From = baiduResult.From
@@ -286,9 +296,17 @@ func (app *VideoSrt) RunTranslate(s string) (*VideoSrtTranslateResult , error) {
 		from := GetLanguageChar(app.TranslateCfg.InputLanguage , TRANSLATE_SUPPLIER_TENGXUNYUN)
 		to := GetLanguageChar(app.TranslateCfg.OutputLanguage , TRANSLATE_SUPPLIER_TENGXUNYUN)
 
-		txResult,e := app.TranslateCfg.TengxunyunTranslate.TranslateTengxunyun(s , from , to)
-		if e != nil {
-			return translateResult,errors.New("翻译失败！错误信息：" + e.Error())
+		//发起翻译请求
+		txResult,transErr := app.TranslateCfg.TengxunyunTranslate.TranslateTengxunyun(s , from , to)
+		for transErr != nil && trys <= 5 {
+			trys++
+			app.Log("翻译请求失败，重试第" + strconv.Itoa(trys) + "次 ..." , file)
+			time.Sleep(time.Second * time.Duration(trys))
+			//重试
+			txResult,transErr = app.TranslateCfg.TengxunyunTranslate.TranslateTengxunyun(s , from , to)
+		}
+		if transErr != nil {
+			return translateResult,errors.New("翻译失败！错误信息：" + transErr.Error())
 		}
 
 		translateResult.TransResultDst = txResult.TransResultDst
@@ -436,7 +454,7 @@ func AliyunAudioResultTranslate(app *VideoSrt , video string , AudioResult map[i
 	if app.OutputType.SRT || app.OutputType.LRC {
 		for _,result := range IntelligentBlockResult {
 			for _ , data := range result {
-				transResult,e := app.RunTranslate(data.Text)
+				transResult,e := app.RunTranslate(data.Text , video)
 				if e != nil {
 					panic(e) //终止翻译
 				}
@@ -448,7 +466,7 @@ func AliyunAudioResultTranslate(app *VideoSrt , video string , AudioResult map[i
 	if app.OutputType.TXT {
 		for _,result := range AudioResult {
 			for _ , data := range result {
-				transResult,e := app.RunTranslate(data.Text)
+				transResult,e := app.RunTranslate(data.Text , video)
 				if e != nil {
 					panic(e) //终止翻译
 				}
