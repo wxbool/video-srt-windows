@@ -14,6 +14,8 @@ CLI（命令行）版本：[https://github.com/wxbool/video-srt](https://github.
 
 软件帮助文档/使用教程看这个：[https://www.yuque.com/viggo-t7cdi/videosrt](https://www.yuque.com/viggo-t7cdi/videosrt)
 
+线上“字幕生成/字幕翻译”解决方案：[字幕酱（付费）](https://www.zimujiang.com/aff?code=aannv4os)
+
 <a name="0b884e4f"></a>
 ## 界面预览
 
