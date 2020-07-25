@@ -4,7 +4,7 @@
 
 这是一个可以识别视频语音自动生成字幕SRT文件的开源软件工具。<br />适用于快速、批量的为媒体（视频/音频）生成中/英文字幕、文本文件的业务场景。
 
-0.2.9 版本将会使用以下接口：
+0.3.0 版本将会使用以下接口：
 - 阿里云 [OSS对象存储](https://www.aliyun.com/product/oss?spm=5176.12825654.eofdhaal5.13.e9392c4aGfj5vj&aly_as=K11FcpO8)
 - 阿里云 [录音文件识别](https://ai.aliyun.com/nls/filetrans?spm=5176.12061031.1228726.1.47fe3cb43I34mn) 
 - 百度翻译开放平台 [翻译API](http://api.fanyi.baidu.com/api/trans/product/index) 
@@ -25,7 +25,7 @@ CLI（命令行）版本：[https://github.com/wxbool/video-srt](https://github.
 
 - 识别**视频/音频**的语音生成字幕文件（支持中英互译，双语字幕）
 - 提取**视频/音频**的语音文本
-- 批量翻译、编码SRT字幕文件
+- 批量翻译、过滤处理/编码SRT字幕文件
 
 
 <a name="b89d37d3"></a>
@@ -36,7 +36,8 @@ CLI（命令行）版本：[https://github.com/wxbool/video-srt](https://github.
 - 支持多任务多文件批量处理
 - 支持视频、音频常见多种格式文件
 - 支持同时输出字幕SRT文件、LRC文件、普通文本3种类型
-- 支持字幕中英互译、双语字幕输出
+- 支持语气词过滤、自定义文本过滤、正则过滤等，使软件生成的字幕更加精准
+- 支持字幕中英互译、双语字幕输出，及日语、韩语、法语、德语、西班牙语、俄语、意大利语、泰语等
 - 支持多翻译引擎（百度翻译、腾讯云翻译）
 - 支持批量翻译、编码SRT字幕文件
 
@@ -45,8 +46,8 @@ CLI（命令行）版本：[https://github.com/wxbool/video-srt](https://github.
 
 <a name="e66a66f1"></a>
 ##### 下载地址:
-- (v0.2.9.5)（含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.2.9.5/video-srt-gui-ffmpeg-0.2.9.5-x64.zip)
-- (v0.2.9.5)（不含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.2.9.5/video-srt-gui-0.2.9.5-x64.zip)
+- (v0.3.0)（含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.3.0/video-srt-gui-ffmpeg-0.3.0-x64.zip)
+- (v0.3.0)（不含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.3.0/video-srt-gui-0.3.0-x64.zip)
 - (v0.2.6)（含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.2.6/video-srt-gui-ffmpeg-0.2.6-x64.zip)
 - (v0.2.6)（不含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.2.6/video-srt-gui-0.2.6-x64.zip)
 
@@ -63,7 +64,7 @@ CLI（命令行）版本：[https://github.com/wxbool/video-srt](https://github.
 
 - 先下载最新版本的软件包
 - 然后用旧版本软件的 `data` 文件夹覆盖新版软件的 `data` 文件夹
-- 0.2.6 升级至 0.2.9时，翻译设置无法直接兼容低版本，需要重新手动创建翻译引擎才能继续使用翻译功能
+- 0.2.6 升级至 0.2.9 以上的版本时，由于翻译设置无法直接兼容低版本，可能需要重新在软件创建翻译引擎才能继续使用翻译功能
 
 ## FAQ
 ##### 1.为什么Linux和Mac不能用？

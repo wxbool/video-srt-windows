@@ -8,6 +8,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"videosrt/app/aliyun"
 	"videosrt/app/tool"
@@ -241,6 +242,11 @@ func(mw *MyMainWindow) RunSpeechEngineSetingDialog(owner walk.Form , confirmCall
 								return
 							}
 
+							//去空格
+							engine.AppKey = strings.TrimSpace(engine.AppKey)
+							engine.AccessKeyId = strings.TrimSpace(engine.AccessKeyId)
+							engine.AccessKeySecret = strings.TrimSpace(engine.AccessKeySecret)
+
 							//获取缓存数据
 							localData := Engine.GetCacheAliyunEngineListData()
 							//生成id
@@ -271,8 +277,6 @@ func(mw *MyMainWindow) RunSpeechEngineSetingDialog(owner walk.Form , confirmCall
 		},
 	}.Run( owner )
 }
-
-
 
 
 // 运行 新建[百度]翻译引擎 Dialog
@@ -369,6 +373,10 @@ func(mw *MyMainWindow) RunBaiduTranslateEngineSetingDialog(owner walk.Form , con
 								mw.NewErrormationTips("提示" , "请填写 AppSecret")
 								return
 							}
+
+							//去空格
+							engine.BaiduEngine.AppId = strings.TrimSpace(engine.BaiduEngine.AppId)
+							engine.BaiduEngine.AppSecret = strings.TrimSpace(engine.BaiduEngine.AppSecret)
 
 							//获取缓存数据
 							localData := Translate.GetCacheTranslateEngineListData()
@@ -484,6 +492,10 @@ func(mw *MyMainWindow) RunTengxunyunTranslateEngineSetingDialog(owner walk.Form 
 								mw.NewErrormationTips("提示" , "请填写 SecretKey")
 								return
 							}
+
+							//去空格
+							engine.TengxunyunEngine.SecretId = strings.TrimSpace(engine.TengxunyunEngine.SecretId)
+							engine.TengxunyunEngine.SecretKey = strings.TrimSpace(engine.TengxunyunEngine.SecretKey)
 
 							//获取缓存数据
 							localData := Translate.GetCacheTranslateEngineListData()
@@ -644,6 +656,396 @@ func (mw *MyMainWindow) RunObjectStorageSetingDialog(owner walk.Form) {
 		},
 	}.Run( owner )
 }
+
+
+//运行 语气词过滤设置 Dialog
+func (mw *MyMainWindow) RunGlobalFilterSetingDialog (owner walk.Form , historyWords string , confirmCall func(words string)) {
+	var dlg *walk.Dialog
+	var db *walk.DataBinder
+	var acceptPB, cancelPB *walk.PushButton
+
+	var tmpData = new(AppFilterSetings)
+	tmpData.GlobalFilter.Words = historyWords
+
+	Dialog{
+		AssignTo:      &dlg,
+		Title:         "全局语气词过滤设置",
+		DefaultButton: &acceptPB,
+		CancelButton:  &cancelPB,
+		DataBinder: DataBinder{
+			AssignTo:       &db,
+			Name:           "filter",
+			DataSource:     tmpData,
+		},
+		MinSize: Size{500, 300},
+		Layout:  VBox{},
+		Children: []Widget{
+			Composite{
+				Layout: Grid{Columns: 2},
+				Children: []Widget{
+					Label{
+						ColumnSpan: 1,
+						Text:       "过滤语气词:",
+					},
+					TextEdit{
+						ColumnSpan: 1,
+						MinSize:    Size{150, 80},
+						Text:       Bind("GlobalFilter.Words"),
+						VScroll:    true,
+					},
+					Label{
+						ColumnSpan: 2,
+						Text: "说明：\r\n“过滤语气词” 支持设置多个，请保持每个词语都单独一行",
+						TextColor:walk.RGB(190 , 190 , 190),
+					},
+				},
+			},
+			Composite{
+				Layout: HBox{},
+				Children: []Widget{
+					HSpacer{},
+					PushButton{
+						AssignTo: &acceptPB,
+						Text:     "保存",
+						OnClicked: func() {
+							if err := db.Submit(); err != nil {
+								log.Fatal(err)
+								return
+							}
+							confirmCall(tmpData.GlobalFilter.Words)
+							//参数验证
+							dlg.Accept()
+						},
+					},
+					PushButton{
+						AssignTo:  &cancelPB,
+						Text:      "取消",
+						OnClicked: func() { dlg.Cancel() },
+					},
+				},
+			},
+		},
+	}.Run( owner )
+}
+
+
+
+type DefinedRuleTableRows struct {
+	Id int
+	Target string //目标规则
+	Replace string //替换规则
+	Way int //规则类型
+}
+type DefinedRuleTableModel struct {
+	walk.SortedReflectTableModelBase
+	maxIndex int
+	items []*DefinedRuleTableRows
+}
+func NewDefinedRuleTableModel () *DefinedRuleTableModel {
+	t := new(DefinedRuleTableModel)
+	return t
+}
+func (m *DefinedRuleTableModel) Items() interface{} {
+	return m.items
+}
+func (m *DefinedRuleTableModel) AddRow (row *DefinedRuleTableRows) {
+	m.maxIndex++
+	row.Id = m.maxIndex;
+	m.items = append(m.items , row)
+}
+func (m *DefinedRuleTableModel) BatchDelRow (indexs []int) {
+	id := make([]int , 0)
+	for row_i , row_v := range m.items {
+		for _ , op_v := range indexs {
+			if row_i == op_v {
+				id = append(id , row_v.Id)
+			}
+		}
+	}
+	for _ , vid := range id {
+		m.DelRow(vid)
+	}
+}
+func (m *DefinedRuleTableModel) GetRowIndex (index int) *DefinedRuleTableRows {
+	tmp := new(DefinedRuleTableRows)
+	for row_i , row_v := range m.items {
+		if row_i == index {
+			tmp = row_v
+			break
+		}
+	}
+	return tmp
+}
+func (m *DefinedRuleTableModel) DelRow (id int) {
+	t := len(m.items)
+	for row_i , row_v := range m.items {
+		if row_v.Id == id {
+			if row_i == 0 {
+				if t <= 1 {
+					m.items = make([]*DefinedRuleTableRows , 0)
+				} else {
+					m.items = m.items[row_i+1:]
+				}
+			} else if row_i+1 >= t {
+				m.items = m.items[:row_i]
+			} else {
+				m.items = append(m.items[:row_i] , m.items[row_i+1:]...)
+			}
+			break
+		}
+	}
+}
+func (tv *DefinedRuleTableModel) SetAndInitFilterRules (rules []*AppDefinedFilterRule)  {
+	//初始化
+	tv.maxIndex = 0
+	tv.items = make([]*DefinedRuleTableRows , 0)
+
+	for _ , v := range rules {
+		tv.maxIndex++
+		tv.items = append(tv.items , &DefinedRuleTableRows{
+			Id:tv.maxIndex,
+			Target:v.Target,
+			Replace:v.Replace,
+			Way:v.Way,
+		})
+	}
+}
+func (tv *DefinedRuleTableModel) GetFilterRuleResult () []*AppDefinedFilterRule {
+	result := make([]*AppDefinedFilterRule , 0)
+	for _ , v := range tv.items {
+		result = append(result , &AppDefinedFilterRule{
+			Target:v.Target,
+			Replace:v.Replace,
+			Way:v.Way,
+		})
+	}
+	return result
+}
+
+
+//运行 自定义过滤设置 Dialog
+func (mw *MyMainWindow) RunDefinedFilterSetingDialog (owner walk.Form , historyRule []*AppDefinedFilterRule , confirmCall func(rule []*AppDefinedFilterRule)) {
+	var dlg *walk.Dialog
+	var acceptPB, cancelPB *walk.PushButton
+	var tv *walk.TableView
+
+	tableModel := NewDefinedRuleTableModel()
+	tableModel.SetAndInitFilterRules(historyRule)
+
+	var currentIndexs []int = make([]int , 0) //选择的项
+
+	Dialog{
+		AssignTo:      &dlg,
+		Title:         "自定义过滤设置",
+		DefaultButton: &acceptPB,
+		CancelButton:  &cancelPB,
+		MinSize: Size{600, 500},
+		Layout:  VBox{},
+		Children: []Widget{
+			Composite{
+				Layout: Grid{Columns: 2},
+				Children: []Widget{
+					PushButton{
+						Text: "新增规则",
+						OnClicked: func() {
+							copyRow := new(DefinedRuleTableRows)
+							if len(currentIndexs) == 1 {
+								copyRow = tableModel.GetRowIndex(currentIndexs[0])
+							}
+
+							mw.RunNewDefinedFilterRuleDialog(mw , copyRow , func(rule *DefinedRuleTableRows) {
+								tableModel.AddRow(rule)
+								tv.SetModel(tableModel)
+							})
+						},
+					},
+					PushButton{
+						Text: "删除规则",
+						OnClicked: func() {
+							if len(currentIndexs) < 1 {
+								mw.NewErrormationTips("错误" , "请选择操作的对象")
+								return
+							}
+							tableModel.BatchDelRow(currentIndexs)
+							tv.SetModel(tableModel)
+						},
+					},
+				},
+			},
+			Composite{
+				Layout: HBox{},
+				Children: []Widget{
+					TableView{
+						Name:"tableView",
+						AssignTo:         &tv,
+						AlternatingRowBG: true,
+						NotSortableByHeaderClick: true,
+						MultiSelection:true,
+						Columns: []TableViewColumn{
+							{Title: "编号", DataMember: "Id" , Width:90},
+							{Title: "类型", DataMember: "Way", Width:90 , FormatFunc: func(value interface{}) string {
+								switch v := value.(type) {
+								case int:
+									if v == FILTER_TYPE_STRING {
+										return "文本过滤"
+									}
+									if v == FILTER_TYPE_REGX {
+										return "正则过滤"
+									}
+									return ""
+								default:
+									return ""
+								}
+							}},
+							{Title: "目标规则", DataMember: "Target", Width:165},
+							{Title: "替换规则", DataMember: "Replace", Width:185},
+						},
+						Model: tableModel,
+						OnSelectedIndexesChanged: func() {
+							indexs := tv.SelectedIndexes()
+							if (len(indexs) > 0) {
+								currentIndexs = indexs
+							} else {
+								currentIndexs = []int{}
+							}
+						},
+					},
+				},
+			},
+			Composite{
+				Layout: HBox{},
+				Children: []Widget{
+					HSpacer{},
+					PushButton{
+						AssignTo: &acceptPB,
+						Text:     "保存",
+						OnClicked: func() {
+							confirmCall(tableModel.GetFilterRuleResult())
+
+							//参数验证
+							dlg.Accept()
+						},
+					},
+					PushButton{
+						AssignTo:  &cancelPB,
+						Text:      "取消",
+						OnClicked: func() { dlg.Cancel() },
+					},
+				},
+			},
+		},
+	}.Run(owner)
+}
+
+//新建自定义过滤规则 Dialog
+func (mw *MyMainWindow) RunNewDefinedFilterRuleDialog (owner walk.Form , copyRows *DefinedRuleTableRows , confirmCall func(rule *DefinedRuleTableRows)) {
+	var dlg *walk.Dialog
+	var db *walk.DataBinder
+	var acceptPB, cancelPB *walk.PushButton
+
+	var tmpData = new(DefinedRuleTableRows)
+	if copyRows.Id != 0 {
+		tmpData.Target = copyRows.Target
+		tmpData.Replace = copyRows.Replace
+		tmpData.Way = copyRows.Way
+	} else {
+		tmpData.Way = 1 //默认
+	}
+
+	Dialog{
+		AssignTo:      &dlg,
+		Title:         "新增自定义过滤规则",
+		DefaultButton: &acceptPB,
+		CancelButton:  &cancelPB,
+		DataBinder: DataBinder{
+			AssignTo:       &db,
+			Name:           "defined",
+			DataSource:     tmpData,
+		},
+		MinSize: Size{500, 300},
+		Layout:  VBox{},
+		Children: []Widget{
+			Composite{
+				Layout: Grid{Columns: 2},
+				Children: []Widget{
+					Label{
+						ColumnSpan: 1,
+						Text:       "目标规则:",
+					},
+					LineEdit{
+						ColumnSpan: 1,
+						MinSize:    Size{Width:150},
+						Text:       Bind("Target"),
+					},
+					Label{
+						ColumnSpan: 1,
+						Text:       "替换规则:",
+					},
+					LineEdit{
+						ColumnSpan: 1,
+						MinSize:    Size{Width:150},
+						Text:       Bind("Replace"),
+					},
+					Label{
+						Text: "过滤类型:",
+					},
+					ComboBox{
+						Value: Bind("Way", SelRequired{}),
+						BindingMember: "Id",
+						DisplayMember: "Name",
+						Model: GetFilterTypeOptionsSelects(),
+					},
+
+					Label{
+						ColumnSpan: 2,
+						Text: "说明：\r\n1.“目标规则” 填写查找的文本/正则， “替换规则” 填写替换的文本/正则\r\n2.过滤类型为正则时，“替换规则” 允许使用 $1...$9 进行反向引用",
+						TextColor:walk.RGB(190 , 190 , 190),
+					},
+				},
+			},
+			Composite{
+				Layout: HBox{},
+				Children: []Widget{
+					HSpacer{},
+					PushButton{
+						AssignTo: &acceptPB,
+						Text:     "保存",
+						OnClicked: func() {
+							if err := db.Submit(); err != nil {
+								log.Fatal(err)
+								return
+							}
+							if strings.TrimSpace(tmpData.Target) == "" {
+								mw.NewErrormationTips("错误" , "必须填写目标规则噢")
+								return
+							}
+							if tmpData.Way == FILTER_TYPE_REGX {
+								//正则规则
+								//校验规则
+								_, e := regexp.Compile(tmpData.Target)
+								if e != nil {
+									mw.NewErrormationTips("错误" , "目标正则规则格式校验不通过，请检查是否正确")
+									return
+								}
+							}
+
+							confirmCall(tmpData)
+							//参数验证
+							dlg.Accept()
+						},
+					},
+					PushButton{
+						AssignTo:  &cancelPB,
+						Text:      "取消",
+						OnClicked: func() { dlg.Cancel() },
+					},
+				},
+			},
+		},
+	}.Run( owner )
+}
+
+
 
 
 //打开 Github

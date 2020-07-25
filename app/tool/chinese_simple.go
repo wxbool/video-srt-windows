@@ -1,7 +1,9 @@
 package tool
 
 import (
+	"regexp"
 	"strings"
+	"unicode/utf8"
 )
 
 
@@ -80,4 +82,24 @@ func ValiChineseNumberChar(s string , unit bool) bool {
 		}
 	}
 	return false
+}
+
+
+//获取utf8字符长度
+func GetStringUtf8Length(s string) int {
+	return utf8.RuneCountInString(s)
+}
+
+
+//检测文本是否仅符号
+func CheckOnlySymbolText(s string) bool {
+	if GetStringUtf8Length(s) > 6 {
+		return false
+	}
+	regx := regexp.MustCompile(`^(\\|\{|\}|\[|\]|（|）|\(|\)|\*|/|~|<|>|_|\-|\+|=|&|%|\$|@|#|—|」|「|！|，|。|。|‍|、|？|；|：|‘|’|”|“|"|'|,|\.|\?|;|:|!|\s)+$`)
+	if regx.Match([]byte(s)) {
+		return true
+	} else {
+		return false
+	}
 }

@@ -13,6 +13,8 @@ import (
 type AliyunAudioRecognitionResultBlock struct {
 	AliyunAudioRecognitionResult
 	Blocks []int
+	BlockEmptyTag bool
+	BlockEmptyHandle bool
 }
 
 //阿里云录音录音文件识别 - 智能分段处理
@@ -87,6 +89,10 @@ func AliyunAudioResultWordHandle(result [] byte , callback func (vresult *Aliyun
 		for _ , data := range value {
 			data.Blocks = GetTextBlock(data.Text)
 			data.Text = ReplaceStrs(data.Text , symbol , "")
+
+			if len(data.Blocks) == 0 {
+				data.BlockEmptyTag = true
+			}
 		}
 	}
 
@@ -144,101 +150,124 @@ func AliyunAudioResultWordHandle(result [] byte , callback func (vresult *Aliyun
 						flag := false
 						early := false
 
-						for t , B := range w.Blocks{
-							//fmt.Println("blockRune : " , blockRune , B , word.Word)
-							if ((blockRune >= B) || (blockRune + chineseNumberDiffLength >= B)) && B != -1 {
-								flag = true
+						if !w.BlockEmptyTag {
+							for t , B := range w.Blocks{
+								//fmt.Println("blockRune : " , blockRune , B , word.Word)
+								if ((blockRune >= B) || (blockRune + chineseNumberDiffLength >= B)) && B != -1 {
+									flag = true
 
-								//fmt.Println(  w.Blocks )
-								//fmt.Println(B , lastBlock , (B - lastBlock) , word.Word)
-								//fmt.Println(w.Text)
-								//fmt.Println(  block )
-								//fmt.Println("\n\n\n")
+									//fmt.Println(  w.Blocks )
+									//fmt.Println(B , lastBlock , (B - lastBlock) , word.Word)
+									//fmt.Println(w.Text)
+									//fmt.Println(  block )
+									//fmt.Println("\n\n\n")
 
-								var thisText = ""
-								//容错机制
-								if t == (len(w.Blocks) - 1) {
-									thisText = SubString(w.Text , lastBlock , 10000)
-								} else {
-									//下个词提前结束
-									if i < len(value)-1 && value[i+1].BeginTime >= w.EndTime{
+									var thisText = ""
+									//容错机制
+									if t == (len(w.Blocks) - 1) {
 										thisText = SubString(w.Text , lastBlock , 10000)
-										early = true
 									} else {
-										thisText = SubString(w.Text , lastBlock , (B - lastBlock))
-									}
-								}
-
-								lastBlock = B
-								if early == true {
-									//全部设置为-1
-									for vt,vb := range w.Blocks{
-										if vb != -1 {
-											w.Blocks[vt] = -1;
+										//下个词提前结束
+										if i < len(value)-1 && value[i+1].BeginTime >= w.EndTime{
+											thisText = SubString(w.Text , lastBlock , 10000)
+											early = true
+										} else {
+											thisText = SubString(w.Text , lastBlock , (B - lastBlock))
 										}
 									}
-								} else {
-									w.Blocks[t] = -1
-								}
 
+									lastBlock = B
+									if early == true {
+										//全部设置为-1
+										for vt,vb := range w.Blocks{
+											if vb != -1 {
+												w.Blocks[vt] = -1;
+											}
+										}
+									} else {
+										w.Blocks[t] = -1
+									}
+
+									vresult := &AliyunAudioRecognitionResult{
+										Text:thisText,
+										ChannelId:channel,
+										BeginTime:beginTime,
+										EndTime:word.EndTime,
+										SilenceDuration:w.SilenceDuration,
+										SpeechRate:w.SpeechRate,
+										EmotionValue:w.EmotionValue,
+									}
+									callback(vresult) //回调传参
+
+									blockBool = true
+									break
+								}
+							}
+
+							//fmt.Println("word.Word : " , word.Word)
+							//fmt.Println(block)
+
+							if FindSliceIntCount(w.Blocks , -1) == len(w.Blocks) {
+								//全部截取完成
+								block = ""
+								lastBlock = 0
+							}
+							//容错机制
+							if FindSliceIntCount(w.Blocks , -1) == (len(w.Blocks)-1) && flag == false {
+								var thisText = SubString(w.Text , lastBlock , 10000)
+
+								w.Blocks[len(w.Blocks) - 1] = -1
+								//vresult
 								vresult := &AliyunAudioRecognitionResult{
 									Text:thisText,
 									ChannelId:channel,
 									BeginTime:beginTime,
-									EndTime:word.EndTime,
+									EndTime:w.EndTime,
+									SilenceDuration:w.SilenceDuration,
+									SpeechRate:w.SpeechRate,
+									EmotionValue:w.EmotionValue,
+								}
+
+								//fmt.Println(  thisText )
+								//fmt.Println(  block )
+								//fmt.Println(  word.Word , beginTime, w.EndTime , flag  , word.EndTime  )
+
+								callback(vresult) //回调传参
+
+								//覆盖下一段落的时间戳
+								if windex < (len(p)-1) {
+									beginTime = p[windex+1].BeginTime
+								} else {
+									beginTime = w.EndTime
+								}
+
+								//清除参数
+								block = ""
+								lastBlock = 0
+							}
+						} else {
+
+							//清除参数
+							block = ""
+							lastBlock = 0
+							blockBool = true
+
+							if w.BlockEmptyHandle == false {
+								vresult := &AliyunAudioRecognitionResult{
+									Text:w.Text,
+									ChannelId:w.ChannelId,
+									BeginTime:w.BeginTime,
+									EndTime:w.EndTime,
 									SilenceDuration:w.SilenceDuration,
 									SpeechRate:w.SpeechRate,
 									EmotionValue:w.EmotionValue,
 								}
 								callback(vresult) //回调传参
-
-								blockBool = true
-								break
-							}
-						}
-
-						//fmt.Println("word.Word : " , word.Word)
-						//fmt.Println(block)
-
-						if FindSliceIntCount(w.Blocks , -1) == len(w.Blocks) {
-							//全部截取完成
-							block = ""
-							lastBlock = 0
-						}
-
-						//容错机制
-						if FindSliceIntCount(w.Blocks , -1) == (len(w.Blocks)-1) && flag == false {
-							var thisText = SubString(w.Text , lastBlock , 10000)
-
-							w.Blocks[len(w.Blocks) - 1] = -1
-							//vresult
-							vresult := &AliyunAudioRecognitionResult{
-								Text:thisText,
-								ChannelId:channel,
-								BeginTime:beginTime,
-								EndTime:w.EndTime,
-								SilenceDuration:w.SilenceDuration,
-								SpeechRate:w.SpeechRate,
-								EmotionValue:w.EmotionValue,
+								w.BlockEmptyHandle = true
 							}
 
-							//fmt.Println(  thisText )
-							//fmt.Println(  block )
-							//fmt.Println(  word.Word , beginTime, w.EndTime , flag  , word.EndTime  )
-
-							callback(vresult) //回调传参
-
-							//覆盖下一段落的时间戳
-							if windex < (len(p)-1) {
-								beginTime = p[windex+1].BeginTime
-							} else {
-								beginTime = w.EndTime
-							}
-
-							//清除参数
-							block = ""
-							lastBlock = 0
 						}
+
 					}
 				}
 			}

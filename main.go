@@ -13,7 +13,7 @@ import (
 )
 
 //应用版本号
-const APP_VERSION = "0.2.9.5"
+const APP_VERSION = "0.3.0"
 
 var AppRootDir string
 var mw *MyMainWindow
@@ -22,6 +22,9 @@ var (
 	outputSrtChecked *walk.CheckBox
 	outputLrcChecked *walk.CheckBox
 	outputTxtChecked *walk.CheckBox
+
+	globalFilterChecked *walk.CheckBox
+	definedFilterChecked *walk.CheckBox
 )
 
 
@@ -53,6 +56,8 @@ func main() {
 	var operateTranslateEngineDb *walk.DataBinder
 	var operateTranslateDb *walk.DataBinder
 	var operateDb *walk.DataBinder
+	var operateFilter *walk.DataBinder
+
 	var operateFrom = new(OperateFrom)
 
 	var startBtn *walk.PushButton //生成字幕Btn
@@ -62,6 +67,7 @@ func main() {
 	var dropFilesEdit *walk.TextEdit
 
 	var appSetings = Setings.GetCacheAppSetingsData()
+	var appFilter = Filter.GetCacheAppFilterData()
 
 	//初始化展示配置
 	operateFrom.Init(appSetings)
@@ -272,7 +278,7 @@ func main() {
 							OnTriggered: mw.OpenAboutGitee,
 						},
 						Action{
-							Text:        "帮助文本",
+							Text:        "帮助文档",
 							Image:      "./data/img/version.png",
 							OnTriggered: func() {
 								_ = tool.OpenUrl("https://www.yuque.com/viggo-t7cdi/videosrt")
@@ -286,10 +292,20 @@ func main() {
 						},
 						Action{
 							Text:        "QQ交流群",
+							Checked:false,
+							Visible:false,
+							Checkable:false,
 							OnTriggered: func() {
 								_ = tool.OpenUrl("https://gitee.com/641453620/video-srt-windows#%E4%BA%A4%E6%B5%81%E8%81%94%E7%B3%BB")
 							},
 						},
+					},
+				},
+				Menu{
+					Text:  "语音合成配音/文章转视频",
+					Image: "./data/img/muyan.png",
+					OnTriggered: func() {
+						_ = tool.OpenUrl("http://www.mu-yan.net/")
 					},
 				},
 			},
@@ -527,6 +543,69 @@ func main() {
 				},
 			},
 
+
+			/*过滤器设置*/
+			HSplitter{
+				Children:[]Widget{
+					Composite{
+						DataBinder: DataBinder{
+							AssignTo:    &operateFilter,
+							DataSource:   appFilter,
+						},
+						Layout: Grid{Columns: 5},
+						Children: []Widget{
+							Label{
+								Text: "过滤设置：",
+							},
+							CheckBox{
+								AssignTo:&globalFilterChecked,
+								Text:"语气词过滤 ",
+								Checked: Bind("GlobalFilter.Switch"),
+								OnClicked: func() {
+									_ = operateFilter.Submit()
+									//更新缓存
+									Filter.SetCacheAppFilterData(appFilter)
+								},
+							},
+							CheckBox{
+								AssignTo:&definedFilterChecked,
+								Text:"自定义过滤  ",
+								Checked: Bind("DefinedFilter.Switch"),
+								OnClicked: func() {
+									_ = operateFilter.Submit()
+									//更新缓存
+									Filter.SetCacheAppFilterData(appFilter)
+								},
+							},
+
+							PushButton{
+								Text: "语气词过滤设置",
+								MaxSize:Size{95 , 55},
+								OnClicked: func() {
+									mw.RunGlobalFilterSetingDialog(mw , appFilter.GlobalFilter.Words , func(words string) {
+										appFilter.GlobalFilter.Words = words
+										//更新缓存
+										Filter.SetCacheAppFilterData(appFilter)
+									})
+								},
+							},
+							PushButton{
+								Text: "自定义过滤设置",
+								MaxSize:Size{95 , 55},
+								OnClicked: func() {
+									mw.RunDefinedFilterSetingDialog(mw , appFilter.DefinedFilter.Rule , func(rule []*AppDefinedFilterRule) {
+										appFilter.DefinedFilter.Rule = rule
+										//更新缓存
+										Filter.SetCacheAppFilterData(appFilter)
+									})
+								},
+							},
+						},
+					},
+				},
+			},
+
+
 			/*输出设置*/
 			HSplitter{
 				Children:[]Widget{
@@ -674,8 +753,11 @@ func main() {
 								return
 							}
 							//校验输入语言
-							if tempAppSetting.InputLanguage == LANGUAGE_KOR {
-								mw.NewErrormationTips("错误" , "由于语音提供商的限制，生成字幕允许的输入语言目前不支持韩语")
+							if tempAppSetting.InputLanguage != LANGUAGE_ZH &&
+								tempAppSetting.InputLanguage != LANGUAGE_EN &&
+								tempAppSetting.InputLanguage != LANGUAGE_JP &&
+								tempAppSetting.InputLanguage != LANGUAGE_SPA {
+								mw.NewErrormationTips("错误" , "由于语音提供商的限制，生成字幕仅支持中文、英文、日语、西班牙语")
 								return
 							}
 
@@ -721,6 +803,7 @@ func main() {
 							//加载配置
 							videosrt.InitAppConfig(ossData , currentEngine)
 							videosrt.InitTranslateConfig(tempTranslateCfg)
+							videosrt.InitFilterConfig(appFilter)
 							videosrt.SetSrtDir(appSetings.SrtFileDir)
 							videosrt.SetSoundTrack(appSetings.SoundTrack)
 							videosrt.SetMaxConcurrency(appSetings.MaxConcurrency)
@@ -806,7 +889,7 @@ func main() {
 
 					PushButton{
 						AssignTo: &startTranslateBtn,
-						Text: "字幕翻译",
+						Text: "字幕处理",
 						MinSize:Size{Height:50},
 						OnClicked: func() {
 							//待处理的文件
@@ -863,6 +946,7 @@ func main() {
 
 							//加载配置
 							srtTranslateApp.InitTranslateConfig(tempTranslateCfg)
+							srtTranslateApp.InitFilterConfig(appFilter)
 							srtTranslateApp.SetSrtDir(appSetings.SrtFileDir)
 							srtTranslateApp.SetMaxConcurrency(appSetings.MaxConcurrency)
 

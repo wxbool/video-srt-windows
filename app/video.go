@@ -54,6 +54,7 @@ type VideoSrt struct {
 	MaxConcurrency int //最大处理并发数
 
 	TranslateCfg *VideoSrtTranslateStruct //翻译配置
+	FilterSetings *AppFilterSetings //过滤器配置
 
 	LogHandler func(s string , video string) //日志回调
 	SuccessHandler func(video string) //成功回调
@@ -96,6 +97,10 @@ func (app *VideoSrt) InitAppConfig(oss *AliyunOssCache , engine *AliyunEngineCac
 //加载翻译设置
 func (app *VideoSrt) InitTranslateConfig (translateSettings *VideoSrtTranslateStruct) {
 	app.TranslateCfg = translateSettings
+}
+//加载过滤器配置
+func (app *VideoSrt) InitFilterConfig (filterSetings *AppFilterSetings) {
+	app.FilterSetings = filterSetings
 }
 
 
@@ -224,7 +229,13 @@ func (app *VideoSrt) Run(video string) {
 	app.Log("文件识别成功 , 字幕处理中 ..." , video)
 
 	//翻译字幕块
-	AliyunAudioResultTranslate(app , video , AudioResult , IntelligentBlockResult)
+	if e := AliyunAudioResultTranslate(app , video , AudioResult , IntelligentBlockResult); e != nil {
+		app.Log("字幕翻译失败，已强制关闭翻译，仅保留原始文件" , video)
+		app.TranslateCfg.TranslateSwitch = false
+	}
+
+	//字幕过滤
+	AliyunResultFilter(app , video , AudioResult , IntelligentBlockResult)
 
 	//输出文件
 	if app.OutputType.SRT {
@@ -371,7 +382,7 @@ func AliyunAudioRecognition(engine aliyun.AliyunClound , filelink string) (Audio
 
 	//遍历获取识别结果
 	resultError := engine.GetAudioFileResult(taskid , client , func(result []byte) {
-		//mylog.WriteLog( string( result ) )
+		//mylog.WriteLog(string(result))
 
 		//结果处理
 		statusText, _ := jsonparser.GetString(result, "StatusText") //结果状态
@@ -438,7 +449,7 @@ func AliyunAudioRecognition(engine aliyun.AliyunClound , filelink string) (Audio
 
 
 //阿里云识别字幕块翻译处理
-func AliyunAudioResultTranslate(app *VideoSrt , video string , AudioResult map[int64][] *aliyun.AliyunAudioRecognitionResult , IntelligentBlockResult map[int64][] *aliyun.AliyunAudioRecognitionResult)  {
+func AliyunAudioResultTranslate(app *VideoSrt , video string , AudioResult map[int64][] *aliyun.AliyunAudioRecognitionResult , IntelligentBlockResult map[int64][] *aliyun.AliyunAudioRecognitionResult) error {
 	//输出日志
 	if app.TranslateCfg.TranslateSwitch {
 		app.Log("字幕翻译处理中 ..." , video)
@@ -448,7 +459,7 @@ func AliyunAudioResultTranslate(app *VideoSrt , video string , AudioResult map[i
 			app.Log("你使用的是 “百度翻译标准版” 账号，翻译速度较慢，请耐心等待 ..." , video)
 		}
 	} else {
-		return
+		return nil
 	}
 
 	if app.OutputType.SRT || app.OutputType.LRC {
@@ -456,7 +467,8 @@ func AliyunAudioResultTranslate(app *VideoSrt , video string , AudioResult map[i
 			for _ , data := range result {
 				transResult,e := app.RunTranslate(data.Text , video)
 				if e != nil {
-					panic(e) //终止翻译
+					return e
+					//panic(e) //终止翻译
 				}
 				data.TranslateText = strings.TrimSpace(transResult.TransResultDst) //译文
 			}
@@ -468,13 +480,87 @@ func AliyunAudioResultTranslate(app *VideoSrt , video string , AudioResult map[i
 			for _ , data := range result {
 				transResult,e := app.RunTranslate(data.Text , video)
 				if e != nil {
-					panic(e) //终止翻译
+					return e
+					//panic(e) //终止翻译
 				}
 				data.TranslateText = strings.TrimSpace(transResult.TransResultDst) //译文
 			}
 		}
 	}
+
+	return nil
 }
+
+//阿里云识别字幕过滤
+func AliyunResultFilter(app *VideoSrt , video string , AudioResult map[int64][] *aliyun.AliyunAudioRecognitionResult , IntelligentBlockResult map[int64][] *aliyun.AliyunAudioRecognitionResult) {
+	if !app.FilterSetings.DefinedFilter.Switch && !app.FilterSetings.GlobalFilter.Switch {
+		return
+	}
+
+	app.Log("字幕过滤处理中 ..." , video)
+
+	//语气词过滤
+	if app.FilterSetings.GlobalFilter.Switch && strings.TrimSpace(app.FilterSetings.GlobalFilter.Words) != "" {
+		modalWords := strings.Split(app.FilterSetings.GlobalFilter.Words , "\r\n")
+
+		for _,result := range IntelligentBlockResult {
+			for _ , data := range result {
+				for _ , w := range modalWords {
+
+					data.Text = ModalWordsFilter(data.Text , w)
+					if app.TranslateCfg.TranslateSwitch {
+						data.TranslateText = ModalWordsFilter(data.TranslateText , w)
+					}
+
+				}
+			}
+		}
+		for _,result := range AudioResult {
+			for _ , data := range result {
+				for _ , w := range modalWords {
+
+					data.Text = ModalWordsFilter(data.Text , w)
+					if app.TranslateCfg.TranslateSwitch {
+						data.TranslateText = ModalWordsFilter(data.TranslateText , w)
+					}
+
+				}
+			}
+		}
+	}
+
+	//自定义规则过滤
+	if app.FilterSetings.DefinedFilter.Switch && len(app.FilterSetings.DefinedFilter.Rule) > 0 {
+		rules := app.FilterSetings.DefinedFilter.Rule
+
+		for _,result := range IntelligentBlockResult {
+			for _ , data := range result {
+				for _ , rule := range rules {
+
+					data.Text = DefinedWordRuleFilter(data.Text , rule)
+					if app.TranslateCfg.TranslateSwitch {
+						data.TranslateText = DefinedWordRuleFilter(data.TranslateText , rule)
+					}
+
+				}
+			}
+		}
+		for _,result := range AudioResult {
+			for _ , data := range result {
+				for _ , rule := range rules {
+
+					data.Text = DefinedWordRuleFilter(data.Text , rule)
+					if app.TranslateCfg.TranslateSwitch {
+						data.TranslateText = DefinedWordRuleFilter(data.TranslateText , rule)
+					}
+
+				}
+			}
+		}
+	}
+}
+
+
 
 //阿里云录音识别结果集生成字幕文件
 func AliyunAudioResultMakeSubtitleFile(app *VideoSrt , video string , outputType int , AudioResult map[int64][] *aliyun.AliyunAudioRecognitionResult , IntelligentBlockResult map[int64][] *aliyun.AliyunAudioRecognitionResult)  {
@@ -551,6 +637,10 @@ func AliyunAudioResultMakeSubtitleFile(app *VideoSrt , video string , outputType
 
 		for _ , data := range result {
 			var linestr string
+
+			if data.Text == "" {
+				continue //跳过空行
+			}
 
 			//字幕、歌词文件处理
 			if outputType == OUTPUT_SRT || outputType == OUTPUT_LRC {

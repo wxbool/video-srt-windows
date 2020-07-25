@@ -25,6 +25,12 @@ const (
 	LANGUAGE_EN = 2 //英文
 	LANGUAGE_JP = 3 //日语
 	LANGUAGE_KOR = 4 //韩语
+	LANGUAGE_FRA = 5 //法语 fra
+	LANGUAGE_DE = 6 //德语 de
+	LANGUAGE_SPA = 7 //西班牙语 spa
+	LANGUAGE_RU = 8 //俄语 ru
+	LANGUAGE_IT = 9 //意大利语 it
+	LANGUAGE_TH = 10 //泰语 th
 )
 
 //缓存结构
@@ -40,12 +46,16 @@ type SpeechEngineAppStruct struct {
 type AppSetingsAppStruct struct {
 	Data *datacache.AppCache
 }
+type AppFilterAppStruct struct {
+	Data *datacache.AppCache
+}
 
 var RootDir string
 var Oss *OssAppStruct
 var Translate *TranslateEngineAppStruct
 var Engine *SpeechEngineAppStruct
 var Setings *AppSetingsAppStruct
+var Filter *AppFilterAppStruct
 
 
 func init()  {
@@ -58,11 +68,13 @@ func init()  {
 	Translate = new(TranslateEngineAppStruct)
 	Engine = new(SpeechEngineAppStruct)
 	Setings = new(AppSetingsAppStruct)
+	Filter = new(AppFilterAppStruct)
 
 	Oss.Data =  datacache.NewAppCahce(RootDir , "oss")
 	Translate.Data =  datacache.NewAppCahce(RootDir , "translate_engine")
 	Engine.Data =  datacache.NewAppCahce(RootDir , "engine")
 	Setings.Data =  datacache.NewAppCahce(RootDir , "setings")
+	Filter.Data =  datacache.NewAppCahce(RootDir , "filter")
 }
 
 
@@ -110,7 +122,7 @@ type AppSetingsOutput struct {
 	TXT bool
 }
 
-//应用配置 - 缓存结构
+//应用配置结构
 type AppSetings struct {
 	CurrentEngineId int //目前语音引擎Id
 	CurrentTranslateEngineId int //目前翻译引擎Id
@@ -129,6 +141,32 @@ type AppSetings struct {
 	CloseNewVersionMessage bool //关闭软件新版本提醒（默认开启）[false开启 true关闭]
 	CloseAutoDeleteOssTempFile bool //关闭自动删除临时音频文件（默认开启）[false开启 true关闭]
 }
+
+
+const (
+	FILTER_TYPE_STRING = 1 //文本过滤
+	FILTER_TYPE_REGX = 2 //正则过滤
+)
+//自定义过滤器规则
+type AppDefinedFilterRule struct {
+	Target string //目标规则
+	Replace string //替换规则
+	Way int //规则类型
+}
+//应用字幕过滤器结构
+type AppFilterSetings struct {
+	//通用过滤器
+	GlobalFilter struct{
+		Switch bool
+		Words string //过滤词组
+	}
+	//自定义过滤器
+	DefinedFilter struct{
+		Switch bool
+		Rule [] *AppDefinedFilterRule
+	}
+}
+
 
 //任务文件列表 - 结构
 type TaskHandleFile struct {
@@ -224,6 +262,12 @@ func GetTranslateInputLanguageOptionsSelects() []*LanguageSelects {
 		&LanguageSelects{Id:LANGUAGE_EN , Name:"英文"},
 		&LanguageSelects{Id:LANGUAGE_JP , Name:"日语"},
 		&LanguageSelects{Id:LANGUAGE_KOR , Name:"韩语"},
+		&LanguageSelects{Id:LANGUAGE_FRA , Name:"法语"},
+		&LanguageSelects{Id:LANGUAGE_DE , Name:"德语"},
+		&LanguageSelects{Id:LANGUAGE_SPA , Name:"西班牙语"},
+		&LanguageSelects{Id:LANGUAGE_RU , Name:"俄语"},
+		&LanguageSelects{Id:LANGUAGE_IT , Name:"意大利语"},
+		&LanguageSelects{Id:LANGUAGE_TH , Name:"泰语"},
 	}
 }
 
@@ -234,6 +278,12 @@ func GetTranslateOutputLanguageOptionsSelects() []*LanguageSelects {
 		&LanguageSelects{Id:LANGUAGE_EN , Name:"英文"},
 		&LanguageSelects{Id:LANGUAGE_JP , Name:"日语"},
 		&LanguageSelects{Id:LANGUAGE_KOR , Name:"韩语"},
+		&LanguageSelects{Id:LANGUAGE_FRA , Name:"法语"},
+		&LanguageSelects{Id:LANGUAGE_DE , Name:"德语"},
+		&LanguageSelects{Id:LANGUAGE_SPA , Name:"西班牙语"},
+		&LanguageSelects{Id:LANGUAGE_RU , Name:"俄语"},
+		&LanguageSelects{Id:LANGUAGE_IT , Name:"意大利语"},
+		&LanguageSelects{Id:LANGUAGE_TH , Name:"泰语"},
 	}
 }
 
@@ -259,6 +309,32 @@ func (setings *AppSetingsAppStruct) SetCacheAppSetingsData(data *AppSetings)  {
 
 
 
+//获取 应用过滤器配置
+func (setings *AppFilterAppStruct) GetCacheAppFilterData() *AppFilterSetings {
+	data := new(AppFilterSetings)
+	vdata := setings.Data.Get(data)
+	if v, ok := vdata.(*AppFilterSetings); ok {
+		return v
+	}
+	return data
+}
+//设置 应用过滤器配置
+func (setings *AppFilterAppStruct) SetCacheAppFilterData(data *AppFilterSetings)  {
+	setings.Data.Set(data)
+}
+
+//过滤类型选项结构
+type FilterTypeSelects struct {
+	Id   int
+	Name string
+}
+//获取 过滤类型选项列表
+func GetFilterTypeOptionsSelects() []*FilterTypeSelects {
+	return []*FilterTypeSelects{
+		&FilterTypeSelects{Id:FILTER_TYPE_STRING , Name:"文本替换"},
+		&FilterTypeSelects{Id:FILTER_TYPE_REGX , Name:"正则替换"},
+	}
+}
 
 
 
@@ -282,6 +358,7 @@ func (oss *OssAppStruct) GetCacheAliyunOssData() *AliyunOssCache {
 	}
 	return data
 }
+
 
 
 
@@ -530,6 +607,18 @@ func GetLanguageChar(Language int , Supplier int) string {
 			return "jp"
 		case LANGUAGE_KOR:
 			return "kor"
+		case LANGUAGE_FRA:
+			return "fra"
+		case LANGUAGE_DE:
+			return "de"
+		case LANGUAGE_SPA:
+			return "spa"
+		case LANGUAGE_RU:
+			return "ru"
+		case LANGUAGE_IT:
+			return "it"
+		case LANGUAGE_TH:
+			return "th"
 		}
 	}
 	if Supplier == TRANSLATE_SUPPLIER_TENGXUNYUN {
@@ -542,6 +631,18 @@ func GetLanguageChar(Language int , Supplier int) string {
 			return "jp"
 		case LANGUAGE_KOR:
 			return "kr"
+		case LANGUAGE_FRA:
+			return "fr"
+		case LANGUAGE_DE:
+			return "de"
+		case LANGUAGE_SPA:
+			return "es"
+		case LANGUAGE_RU:
+			return "ru"
+		case LANGUAGE_IT:
+			return "it"
+		case LANGUAGE_TH:
+			return "th"
 		}
 	}
 	return ""

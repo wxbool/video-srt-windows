@@ -57,6 +57,7 @@ type SrtTranslateApp struct {
 	OutputEncode int //输出文件编码
 	MaxConcurrency int //最大处理并发数
 	TranslateCfg *SrtTranslateStruct //翻译配置
+	FilterSetings *AppFilterSetings //过滤器配置
 
 	LogHandler func(s string , file string) //日志回调
 	SuccessHandler func(file string) //成功回调
@@ -79,6 +80,11 @@ func NewSrtTranslateApp(appDir string) *SrtTranslateApp {
 func (app *SrtTranslateApp) InitTranslateConfig (translateSettings *SrtTranslateStruct) {
 	app.TranslateCfg = translateSettings
 }
+//加载过滤器配置
+func (app *SrtTranslateApp) InitFilterConfig (filterSetings *AppFilterSetings) {
+	app.FilterSetings = filterSetings
+}
+
 
 func (app *SrtTranslateApp) SetSrtDir(dir string)  {
 	app.SrtDir = dir
@@ -153,6 +159,9 @@ func (app *SrtTranslateApp) Run(srtfile string) {
 
 	//字幕翻译
 	app.SrtTranslate(srtfile , srtRows)
+
+	//字幕过滤
+	app.SrtFilters(srtRows , srtfile)
 
 	//输出文件
 	if app.OutputType.SRT {
@@ -236,6 +245,40 @@ func (app *SrtTranslateApp) SrtTranslate(file string , srtRows []*SrtRows)  {
 }
 
 
+//字幕过滤处理
+func (app *SrtTranslateApp) SrtFilters (srtRows []*SrtRows , file string) {
+	if !app.FilterSetings.DefinedFilter.Switch && !app.FilterSetings.GlobalFilter.Switch {
+		return
+	}
+
+	app.Log("字幕过滤处理中 ..." , file)
+
+	//语气词过滤
+	if app.FilterSetings.GlobalFilter.Switch && strings.TrimSpace(app.FilterSetings.GlobalFilter.Words) != "" {
+		modalWords := strings.Split(app.FilterSetings.GlobalFilter.Words , "\r\n")
+		for _ , row := range srtRows {
+			for _ , w := range modalWords {
+				row.Text = ModalWordsFilter(row.Text , w)
+				if app.TranslateCfg.TranslateSwitch {
+					row.TranslateText = ModalWordsFilter(row.TranslateText , w)
+				}
+			}
+		}
+	}
+	//自定义规则过滤
+	if app.FilterSetings.DefinedFilter.Switch && len(app.FilterSetings.DefinedFilter.Rule) > 0 {
+		rules := app.FilterSetings.DefinedFilter.Rule
+		for _ , row := range srtRows {
+			for _ , ru := range rules {
+				row.Text = DefinedWordRuleFilter(row.Text , ru)
+				if app.TranslateCfg.TranslateSwitch {
+					row.TranslateText = DefinedWordRuleFilter(row.TranslateText , ru)
+				}
+			}
+		}
+	}
+}
+
 //文件输出
 func (app *SrtTranslateApp) SrtOutputFile(file string , srtRows []*SrtRows , outputType int)  {
 	var subfileDir string
@@ -282,6 +325,10 @@ func (app *SrtTranslateApp) SrtOutputFile(file string , srtRows []*SrtRows , out
 
 	for _ , data := range srtRows {
 		var linestr string
+
+		if data.Text == "" {
+			continue //跳过空行
+		}
 
 		//字幕、歌词文件处理
 		if outputType == OUTPUT_SRT || outputType == OUTPUT_LRC {
