@@ -7,9 +7,22 @@ import (
 )
 
 
+func CheckChineseNumber(s string) bool {
+	regx := regexp.MustCompile("(.*)([一|二|两|三|四|五|六|七|八|九|十|百|千|万|亿]+)(.*)")
+	return regx.MatchString(s)
+}
+
 func ChineseNumberToLowercaseLength(s string) int {
-	if (!IsChineseNumber(s)) {
-		return 0
+	st := GetStringUtf8Length(s)
+	regx := regexp.MustCompile("([一|二|两|三|四|五|六|七|八|九|十|百|千|万|亿]+)(.*)")
+	s = regx.ReplaceAllString(s , "$1")
+	if s == "" || !IsChineseNumber(s) {
+		return st
+	}
+	rst := GetStringUtf8Length(s)
+	cha_t := 0
+	if st > rst {
+		cha_t = st - rst
 	}
 	s = strings.TrimSpace(s)
 	zhTexts := strings.Split(s , "")
@@ -38,7 +51,7 @@ func ChineseNumberToLowercaseLength(s string) int {
 		}
 		numberPosi = !numberPosi
 	}
-	return maxBaseNumber
+	return maxBaseNumber+cha_t
 }
 
 
@@ -64,7 +77,7 @@ func IsChineseNumber(text string) bool {
 
 
 func ValiChineseNumberChar(s string , unit bool) bool {
-	zh_number := []string{"一","二","两","三","四","五","六","七","八","九","十"}
+	zh_number := []string{"一","二","两","三","四","五","六","七","八","九","十","百","千","万"}
 	zh_unit := []string{"十","百","千","万","亿"}
 
 	if unit {

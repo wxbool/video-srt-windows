@@ -13,7 +13,7 @@ import (
 )
 
 //应用版本号
-const APP_VERSION = "0.3.0"
+const APP_VERSION = "0.3.1"
 
 var AppRootDir string
 var mw *MyMainWindow
@@ -73,7 +73,7 @@ func main() {
 	operateFrom.Init(appSetings)
 
 	//日志
-	var tasklog = NewTasklog()
+	var tasklog = NewTasklog(logText)
 
 	//字幕生成应用
 	var videosrt = NewApp(AppRootDir)
@@ -847,7 +847,7 @@ func main() {
 										startTranslateBtn.SetEnabled(true)
 										startBtn.SetText("生成字幕")
 
-										logText.AppendText("\r\n\r\n任务完成！")
+										tasklog.AppendLogText("\r\n\r\n任务完成！")
 
 										//清空临时目录
 										videosrt.ClearTempDir()
@@ -868,7 +868,7 @@ func main() {
 										startTranslateBtn.SetEnabled(true)
 										startBtn.SetText("生成字幕")
 
-										logText.AppendText("\r\n\r\n任务完成！")
+										tasklog.AppendLogText("\r\n\r\n任务完成！")
 
 										//清空临时目录
 										videosrt.ClearTempDir()
@@ -876,14 +876,6 @@ func main() {
 								}
 							})
 
-							//日志输出
-							go func() {
-								for finish == false {
-									logText.SetText("")
-									logText.AppendText(tasklog.GetString())
-									time.Sleep(time.Millisecond * 150)
-								}
-							}()
 						},
 					},
 
@@ -988,7 +980,7 @@ func main() {
 										startTranslateBtn.SetEnabled(true)
 										startTranslateBtn.SetText("字幕翻译")
 
-										logText.AppendText("\r\n\r\n任务完成！")
+										tasklog.AppendLogText("\r\n\r\n任务完成！")
 									}()
 								}
 							})
@@ -1006,19 +998,10 @@ func main() {
 										startTranslateBtn.SetEnabled(true)
 										startTranslateBtn.SetText("字幕翻译")
 
-										logText.AppendText("\r\n\r\n任务完成！")
+										tasklog.AppendLogText("\r\n\r\n任务完成！")
 									}()
 								}
 							})
-
-							//日志输出
-							go func() {
-								for finish == false {
-									logText.SetText("")
-									logText.AppendText(tasklog.GetString())
-									time.Sleep(time.Millisecond * 150)
-								}
-							}()
 						},
 					},
 				},
@@ -1040,6 +1023,9 @@ func main() {
 
 		time.Sleep(1 * time.Second)
 	}
+
+	//更新
+	tasklog.SetTextEdit(logText)
 
 	//校验依赖库
 	if e := ffmpeg.VailFfmpegLibrary(); e != nil {

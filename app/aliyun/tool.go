@@ -124,7 +124,7 @@ func AliyunAudioResultWordHandle(result [] byte , callback func (vresult *Aliyun
 
 			if ischinese {
 				block += word.Word
-				if tool.IsChineseNumber(word.Word) && FindSliceIntCount(chineseNumberWordIndexs , i) == 0 {
+				if tool.CheckChineseNumber(word.Word) && FindSliceIntCount(chineseNumberWordIndexs , i) == 0 {
 					cl := tool.ChineseNumberToLowercaseLength(word.Word)
 
 					if (cl - utf8.RuneCountInString(word.Word)) > 0 {
@@ -137,6 +137,7 @@ func AliyunAudioResultWordHandle(result [] byte , callback func (vresult *Aliyun
 			}
 
 			blockRune = utf8.RuneCountInString(block)
+
 			//fmt.Println("chineseNumberDiffLength : " , chineseNumberWordIndexs , chineseNumberDiffLength , word.Word)
 
 			for channel , p := range audioResult {

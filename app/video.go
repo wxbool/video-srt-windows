@@ -3,6 +3,7 @@ package app
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"github.com/buger/jsonparser"
 	"os"
 	"path"
@@ -230,7 +231,8 @@ func (app *VideoSrt) Run(video string) {
 
 	//翻译字幕块
 	if e := AliyunAudioResultTranslate(app , video , AudioResult , IntelligentBlockResult); e != nil {
-		app.Log("字幕翻译失败，已强制关闭翻译，仅保留原始文件" , video)
+		app.Log("字幕翻译失败：" + e.Error() , video)
+		app.Log("已强制关闭翻译，仅输出原始字幕文件" , video)
 		app.TranslateCfg.TranslateSwitch = false
 	}
 
@@ -382,7 +384,6 @@ func AliyunAudioRecognition(engine aliyun.AliyunClound , filelink string) (Audio
 
 	//遍历获取识别结果
 	resultError := engine.GetAudioFileResult(taskid , client , func(result []byte) {
-		//mylog.WriteLog(string(result))
 
 		//结果处理
 		statusText, _ := jsonparser.GetString(result, "StatusText") //结果状态
@@ -462,8 +463,47 @@ func AliyunAudioResultTranslate(app *VideoSrt , video string , AudioResult map[i
 		return nil
 	}
 
+	//输出音轨
+	outputSoundTrack := app.SoundTrack
+
+	//计算总任务行数
+	totalRow := 0 //总处理行数
+	var lastrv float64 = 0 //最后进度（%）
+
 	if app.OutputType.SRT || app.OutputType.LRC {
-		for _,result := range IntelligentBlockResult {
+		for channel , result := range IntelligentBlockResult {
+			soundChannel := channel + 1
+			if outputSoundTrack != 3 && outputSoundTrack != 0 {
+				if outputSoundTrack != int(soundChannel) {
+					continue //跳出非输出音轨转换
+				}
+			}
+			totalRow += len(result)
+		}
+	}
+	if app.OutputType.TXT {
+		for channel,result := range AudioResult {
+			soundChannel := channel + 1
+			if outputSoundTrack != 3 && outputSoundTrack != 0 {
+				if outputSoundTrack != int(soundChannel) {
+					continue //跳出非输出音轨转换
+				}
+			}
+			totalRow += len(result)
+		}
+	}
+
+	index := 0
+	//翻译任务
+	if app.OutputType.SRT || app.OutputType.LRC {
+		for channel , result := range IntelligentBlockResult {
+			soundChannel := channel + 1
+			if outputSoundTrack != 3 && outputSoundTrack != 0 {
+				if outputSoundTrack != int(soundChannel) {
+					continue //跳出非输出音轨转换
+				}
+			}
+
 			for _ , data := range result {
 				transResult,e := app.RunTranslate(data.Text , video)
 				if e != nil {
@@ -471,12 +511,27 @@ func AliyunAudioResultTranslate(app *VideoSrt , video string , AudioResult map[i
 					//panic(e) //终止翻译
 				}
 				data.TranslateText = strings.TrimSpace(transResult.TransResultDst) //译文
+
+				index++
+				rv := (float64(index)/float64(totalRow))*100
+				if (rv - lastrv) > 20 {
+					//输出比例
+					app.Log("字幕翻译已处理：" + fmt.Sprintf("%.2f" , rv) + "%" , video)
+					lastrv = rv
+				}
 			}
 		}
 	}
 
 	if app.OutputType.TXT {
-		for _,result := range AudioResult {
+		for channel,result := range AudioResult {
+			soundChannel := channel + 1
+			if outputSoundTrack != 3 && outputSoundTrack != 0 {
+				if outputSoundTrack != int(soundChannel) {
+					continue //跳出非输出音轨转换
+				}
+			}
+
 			for _ , data := range result {
 				transResult,e := app.RunTranslate(data.Text , video)
 				if e != nil {
@@ -484,6 +539,15 @@ func AliyunAudioResultTranslate(app *VideoSrt , video string , AudioResult map[i
 					//panic(e) //终止翻译
 				}
 				data.TranslateText = strings.TrimSpace(transResult.TransResultDst) //译文
+
+
+				index++
+				rv := (float64(index)/float64(totalRow))*100
+				if (rv - lastrv) > 20 {
+					//输出比例
+					app.Log("字幕翻译已处理：" + fmt.Sprintf("%.2f" , rv) + "%" , video)
+					lastrv = rv
+				}
 			}
 		}
 	}
