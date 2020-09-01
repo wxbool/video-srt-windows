@@ -138,6 +138,7 @@ type AppSetings struct {
 	OutputLanguage int //输出字幕语言
 	OutputMainSubtitleInputLanguage bool //双语主字幕（输入语言）
 
+	CloseIntelligentBlockSwitch bool //关闭智能分段
 	CloseNewVersionMessage bool //关闭软件新版本提醒（默认开启）[false开启 true关闭]
 	CloseAutoDeleteOssTempFile bool //关闭自动删除临时音频文件（默认开启）[false开启 true关闭]
 }

@@ -83,10 +83,13 @@ func AliyunAudioResultWordHandle(result [] byte , callback func (vresult *Aliyun
 	}
 
 
-	var symbol = []string{"？","。","，","！","；","?",".",",","!"}
+	var symbol = []string{"？","。","，","！","；","、","?",".",",","!"}
 	//数据集处理
 	for _ , value := range audioResult {
 		for _ , data := range value {
+			// filter
+			data.Text = FilterText(data.Text)
+
 			data.Blocks = GetTextBlock(data.Text)
 			data.Text = ReplaceStrs(data.Text , symbol , "")
 
@@ -125,11 +128,20 @@ func AliyunAudioResultWordHandle(result [] byte , callback func (vresult *Aliyun
 			if ischinese {
 				block += word.Word
 				if tool.CheckChineseNumber(word.Word) && FindSliceIntCount(chineseNumberWordIndexs , i) == 0 {
-					cl := tool.ChineseNumberToLowercaseLength(word.Word)
-
-					if (cl - utf8.RuneCountInString(word.Word)) > 0 {
-						chineseNumberDiffLength += (cl - utf8.RuneCountInString(word.Word))
+					cl := tool.ChineseNumberToLowercaseLength(word.Word) - utf8.RuneCountInString(word.Word)
+					if cl > 0 {
+						chineseNumberDiffLength += cl
 						chineseNumberWordIndexs = append(chineseNumberWordIndexs , i)
+					} else {
+						//例外
+						if i != 0 {
+							newWord := value[i-1].Word + word.Word
+							cl := tool.ChineseNumberToLowercaseLength(newWord) - utf8.RuneCountInString(newWord)
+							if cl > 0 {
+								chineseNumberDiffLength += cl
+								chineseNumberWordIndexs = append(chineseNumberWordIndexs , i)
+							}
+						}
 					}
 				}
 			} else {
@@ -157,11 +169,11 @@ func AliyunAudioResultWordHandle(result [] byte , callback func (vresult *Aliyun
 								if ((blockRune >= B) || (blockRune + chineseNumberDiffLength >= B)) && B != -1 {
 									flag = true
 
-									//fmt.Println(  w.Blocks )
+									//fmt.Println(w.Blocks)
 									//fmt.Println(B , lastBlock , (B - lastBlock) , word.Word)
 									//fmt.Println(w.Text)
 									//fmt.Println(  block )
-									//fmt.Println("\n\n\n")
+									//fmt.Println("\n")
 
 									var thisText = ""
 									//容错机制
@@ -353,7 +365,7 @@ func IndexRunes(strs string , olds []rune) int  {
 }
 
 func GetTextBlock(strs string) ([]int) {
-	var symbol_zhcn = []rune{'？','。','，','！','；','?','.',',','!'}
+	var symbol_zhcn = []rune{'？','。','，','！','；','、','?','.',',','!'}
 	//var symbol_en = []rune{'?','.',',','!'}
 	strsRune := []rune(strs)
 
@@ -389,4 +401,13 @@ func SubString(str string , begin int ,length int) (substr string) {
 	}
 	// 返回子串
 	return string(rs[begin:end])
+}
+
+
+//过滤文本
+func FilterText(text string) string {
+	//去除换行符
+	re, _ := regexp.Compile("[\n|\r|\r\n]+")
+	text = re.ReplaceAllString(text, "")
+	return text
 }

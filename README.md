@@ -4,7 +4,7 @@
 
 这是一个可以识别视频语音自动生成字幕SRT文件的开源软件工具。<br />适用于快速、批量的为媒体（视频/音频）生成中/英文字幕、文本文件的业务场景。
 
-0.3.1 版本将会使用以下接口：
+0.3.2 版本将会使用以下接口：
 - 阿里云 [OSS对象存储](https://www.aliyun.com/product/oss?spm=5176.12825654.eofdhaal5.13.e9392c4aGfj5vj&aly_as=K11FcpO8)
 - 阿里云 [录音文件识别](https://ai.aliyun.com/nls/filetrans?spm=5176.12061031.1228726.1.47fe3cb43I34mn) 
 - 百度翻译开放平台 [翻译API](http://api.fanyi.baidu.com/api/trans/product/index) 
@@ -14,7 +14,11 @@ CLI（命令行）版本：[https://github.com/wxbool/video-srt](https://github.
 
 软件帮助文档/使用教程看这个：[https://www.yuque.com/viggo-t7cdi/videosrt](https://www.yuque.com/viggo-t7cdi/videosrt)
 
+B站Up主自制教程：[https://search.bilibili.com/all?keyword=videosrt](https://search.bilibili.com/all?keyword=videosrt)
+
 线上“字幕生成/字幕翻译”解决方案：[字幕酱（付费）](https://www.zimujiang.com/aff?code=aannv4os)
+
+线上“文字配音/字幕配音/文章转视频”解决方案：[幕言](https://www.mu-yan.com/?videosrt)
 
 <a name="0b884e4f"></a>
 ## 界面预览
@@ -46,8 +50,8 @@ CLI（命令行）版本：[https://github.com/wxbool/video-srt](https://github.
 
 <a name="e66a66f1"></a>
 ##### 下载地址:
-- (v0.3.1)（含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.3.1/video-srt-gui-ffmpeg-0.3.1-x64.zip)
-- (v0.3.1)（不含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.3.1/video-srt-gui-0.3.1-x64.zip)
+- (v0.3.2)（含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.3.2/video-srt-gui-ffmpeg-0.3.2-x64.zip)
+- (v0.3.2)（不含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.3.2/video-srt-gui-0.3.2-x64.zip)
 - (v0.2.6)（含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.2.6/video-srt-gui-ffmpeg-0.2.6-x64.zip)
 - (v0.2.6)（不含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.2.6/video-srt-gui-0.2.6-x64.zip)
 

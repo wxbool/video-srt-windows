@@ -13,7 +13,7 @@ import (
 )
 
 //应用版本号
-const APP_VERSION = "0.3.1"
+const APP_VERSION = "0.3.2"
 
 var AppRootDir string
 var mw *MyMainWindow
@@ -108,6 +108,7 @@ func main() {
 		AssignTo: &mw.MainWindow,
 		Icon:"./data/img/index.png",
 		Title:    "VideoSrt - 一键字幕生成、字幕翻译小工具" + " - " + APP_VERSION,
+		Font:Font{Family: "微软雅黑", PointSize: 9},
 		ToolBar: ToolBar{
 			ButtonStyle: ToolBarButtonImageBeforeText,
 			Items: []MenuItem{
@@ -255,6 +256,7 @@ func main() {
 									appSetings.SrtFileDir = setings.SrtFileDir
 									appSetings.CloseNewVersionMessage = setings.CloseNewVersionMessage
 									appSetings.CloseAutoDeleteOssTempFile = setings.CloseAutoDeleteOssTempFile
+									appSetings.CloseIntelligentBlockSwitch = setings.CloseIntelligentBlockSwitch
 
 									multitask.SetMaxConcurrencyNumber( setings.MaxConcurrency )
 									srtTranslateMultitask.SetMaxConcurrencyNumber( setings.MaxConcurrency )
@@ -305,13 +307,13 @@ func main() {
 					Text:  "语音合成配音/文章转视频",
 					Image: "./data/img/muyan.png",
 					OnTriggered: func() {
-						_ = tool.OpenUrl("http://www.mu-yan.net/")
+						_ = tool.OpenUrl("https://www.mu-yan.net/")
 					},
 				},
 			},
 		},
-		Size: Size{800, 600},
-		MinSize: Size{300, 500},
+		Size: Size{800, 650},
+		MinSize: Size{300, 650},
 		Layout:  VBox{},
 		Children: []Widget{
 			HSplitter{
@@ -728,9 +730,24 @@ func main() {
 
 							tlens := len(taskFiles.Files)
 							if tlens == 0 {
-								mw.NewErrormationTips("错误" , "请先拖入要处理的媒体文件")
-								return
+								//兼容外部调用
+								tempDropFilesEdit := dropFilesEdit.Text()
+								if tempDropFilesEdit != "" {
+									tempFileLists := strings.Split(tempDropFilesEdit , "\r\n")
+									//检测文件列表
+									tempResult , _ := VaildateHandleFiles(tempFileLists , true ,false)
+									if len(tempResult) != 0 {
+										taskFiles.Files = tempResult
+										dropFilesEdit.SetText(strings.Join(tempResult, "\r\n"))
+									}
+								}
+
+								if len(taskFiles.Files) == 0 {
+									mw.NewErrormationTips("错误" , "请先拖入要处理的媒体文件")
+									return
+								}
 							}
+
 							//校验文件列表
 							if _,e := VaildateHandleFiles(taskFiles.Files , true , false); e!=nil {
 								mw.NewErrormationTips("错误" , e.Error())
@@ -756,8 +773,10 @@ func main() {
 							if tempAppSetting.InputLanguage != LANGUAGE_ZH &&
 								tempAppSetting.InputLanguage != LANGUAGE_EN &&
 								tempAppSetting.InputLanguage != LANGUAGE_JP &&
+								tempAppSetting.InputLanguage != LANGUAGE_KOR &&
+								tempAppSetting.InputLanguage != LANGUAGE_RU &&
 								tempAppSetting.InputLanguage != LANGUAGE_SPA {
-								mw.NewErrormationTips("错误" , "由于语音提供商的限制，生成字幕仅支持中文、英文、日语、西班牙语")
+								mw.NewErrormationTips("错误" , "由于语音提供商的限制，生成字幕仅支持中文、英文、日语、韩语、俄语、西班牙语")
 								return
 							}
 
@@ -808,6 +827,7 @@ func main() {
 							videosrt.SetSoundTrack(appSetings.SoundTrack)
 							videosrt.SetMaxConcurrency(appSetings.MaxConcurrency)
 							videosrt.SetCloseAutoDeleteOssTempFile(appSetings.CloseAutoDeleteOssTempFile)
+							videosrt.SetCloseIntelligentBlockSwitch(appSetings.CloseIntelligentBlockSwitch)
 
 							//设置输出文件
 							videosrt.SetOutputType(operateFrom.OutputType)
@@ -887,7 +907,7 @@ func main() {
 							//待处理的文件
 							tlens := len(taskFiles.Files)
 							if tlens == 0 {
-								mw.NewErrormationTips("错误" , "请先拖入要处理的字幕文件")
+								mw.NewErrormationTips("错误" , "请先拖入需要处理的SRT字幕文件")
 								return
 							}
 							//校验文件列表

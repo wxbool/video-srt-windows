@@ -31,25 +31,29 @@ func ChineseNumberToLowercaseLength(s string) int {
 	numberPosi := true
 	maxBaseNumber := 1
 
-	for i:=0; i<zhTextsLens; i++ {
-		if numberPosi == false {
-			switch zhTexts[i] {
-			case "十":
-				maxBaseNumber = 2
-				break
-			case "百":
-				maxBaseNumber = 3
-				break
-			case "千":
-				maxBaseNumber = 4
-				break
-			case "万":
-				maxBaseNumber = 5
+	if s == "十" {
+		maxBaseNumber = 2
+	} else {
+		for i:=0; i<zhTextsLens; i++ {
+			if numberPosi == false {
+				switch zhTexts[i] {
+				case "十":
+					maxBaseNumber = 2
+					break
+				case "百":
+					maxBaseNumber = 3
+					break
+				case "千":
+					maxBaseNumber = 4
+					break
+				case "万":
+					maxBaseNumber = 5
+					break
+				}
 				break
 			}
-			break
+			numberPosi = !numberPosi
 		}
-		numberPosi = !numberPosi
 	}
 	return maxBaseNumber+cha_t
 }

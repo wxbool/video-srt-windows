@@ -46,6 +46,7 @@ func(mw *MyMainWindow) RunAppSetingDialog(owner walk.Form , confirmCall func(*Ap
 	Dialog{
 		AssignTo:      &dlg,
 		Title:         "软件设置",
+		Font:Font{Family: "微软雅黑", PointSize: 9},
 		DefaultButton: &acceptPB,
 		CancelButton:  &cancelPB,
 		DataBinder: DataBinder{
@@ -82,6 +83,12 @@ func(mw *MyMainWindow) RunAppSetingDialog(owner walk.Form , confirmCall func(*Ap
 					},
 
 
+					Label{
+						Text: "关闭软件智能分段处理:",
+					},
+					CheckBox{
+						Checked: Bind("CloseIntelligentBlockSwitch"),
+					},
 					Label{
 						Text: "关闭OSS临时文件清理:",
 					},
@@ -153,6 +160,7 @@ func(mw *MyMainWindow) RunSpeechEngineSetingDialog(owner walk.Form , confirmCall
 	Dialog{
 		AssignTo:      &dlg,
 		Title:         "新建语音引擎",
+		Font:Font{Family: "微软雅黑", PointSize: 9},
 		DefaultButton: &acceptPB,
 		CancelButton:  &cancelPB,
 		DataBinder: DataBinder{
@@ -295,6 +303,7 @@ func(mw *MyMainWindow) RunBaiduTranslateEngineSetingDialog(owner walk.Form , con
 	Dialog{
 		AssignTo:      &dlg,
 		Title:         "新建翻译引擎（百度翻译）",
+		Font:Font{Family: "微软雅黑", PointSize: 9},
 		DefaultButton: &acceptPB,
 		CancelButton:  &cancelPB,
 		DataBinder: DataBinder{
@@ -424,6 +433,7 @@ func(mw *MyMainWindow) RunTengxunyunTranslateEngineSetingDialog(owner walk.Form 
 	Dialog{
 		AssignTo:      &dlg,
 		Title:         "新建翻译引擎（腾讯云）",
+		Font:Font{Family: "微软雅黑", PointSize: 9},
 		DefaultButton: &acceptPB,
 		CancelButton:  &cancelPB,
 		DataBinder: DataBinder{
@@ -543,6 +553,7 @@ func (mw *MyMainWindow) RunObjectStorageSetingDialog(owner walk.Form) {
 	Dialog{
 		AssignTo:      &dlg,
 		Title:         "OSS对象存储设置",
+		Font:Font{Family: "微软雅黑", PointSize: 9},
 		DefaultButton: &acceptPB,
 		CancelButton:  &cancelPB,
 		DataBinder: DataBinder{
@@ -670,6 +681,7 @@ func (mw *MyMainWindow) RunGlobalFilterSetingDialog (owner walk.Form , historyWo
 	Dialog{
 		AssignTo:      &dlg,
 		Title:         "全局语气词过滤设置",
+		Font:Font{Family: "微软雅黑", PointSize: 9},
 		DefaultButton: &acceptPB,
 		CancelButton:  &cancelPB,
 		DataBinder: DataBinder{
@@ -837,6 +849,7 @@ func (mw *MyMainWindow) RunDefinedFilterSetingDialog (owner walk.Form , historyR
 	Dialog{
 		AssignTo:      &dlg,
 		Title:         "自定义过滤设置",
+		Font:Font{Family: "微软雅黑", PointSize: 9},
 		DefaultButton: &acceptPB,
 		CancelButton:  &cancelPB,
 		MinSize: Size{600, 500},
@@ -955,6 +968,7 @@ func (mw *MyMainWindow) RunNewDefinedFilterRuleDialog (owner walk.Form , copyRow
 	Dialog{
 		AssignTo:      &dlg,
 		Title:         "新增自定义过滤规则",
+		Font:Font{Family: "微软雅黑", PointSize: 9},
 		DefaultButton: &acceptPB,
 		CancelButton:  &cancelPB,
 		DataBinder: DataBinder{
