@@ -2,14 +2,52 @@ name: Go
 
 on:
   push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+        branches:
+          - master
+          - feature/*
+        paths-ignore:
+          - '**/*.md'
+          - .gitignore
+          - .editorconfig
+          - appveyor.yml
+          - 'azure-pipelines*.yml'
+          - 'ci/azure-pipelines/template*.yml'
 
+        pull_request:
+          branches:
+            - master
+            - feature/*
+            - release/*
+          paths-ignore:
+            - '**/*.md'
+            - .gitignore
+            - .editorconfig
+            - appveyor.yml
+            - 'azure-pipelines*.yml'
+            - 'ci/azure-pipelines/template*.yml'
 jobs:
 
-  build:
+  Build test:
     runs-on: windows-latest
+    strategy:
+      matrix:
+        go: [ '1.15','1.14', '1.13' ]
+    name: Go ${{ matrix.go }} test
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go }}
+      - run: go test
+  
+  Build on Windows:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        go: [ '1.15','1.14', '1.13' ]
+    
+    
     steps:
     - uses: actions/checkout@v2
 
@@ -18,8 +56,16 @@ jobs:
       with:
         go-version: 1.15
 
-    - name: Build
+    - name: Cache local go package
+      uses: actions/cache@v2
+      with:
+        path: ~/go/pkg/mod
+        key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+        restore-keys: |
+          ${{ runner.os }}-go-
+
+    - name: Build video-srt-windows
       run: go build
 
-    - name: Test
+    - name: Test video-srt-windows
       run: go test
