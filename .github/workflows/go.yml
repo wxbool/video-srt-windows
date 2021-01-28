@@ -32,7 +32,7 @@ jobs:
     strategy:
       matrix:
         ver: [ 'test','build' ]
-        go: [ '1.15','1.14', '1.13','1.12','1.11' ]
+        go: [ '1.15','1.14', '1.13' ]
     name: Go ${{ matrix.go }} ${{ matrix.ver }} 
     steps:
       - uses: actions/checkout@v2
