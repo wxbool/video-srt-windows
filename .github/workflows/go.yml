@@ -27,7 +27,8 @@ on:
             - 'ci/azure-pipelines/template*.yml'
 jobs:
 
-  Build test:
+  Build:
+    name: Build&test video-srt-windows
     runs-on: windows-latest
     strategy:
       matrix:
@@ -37,7 +38,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       
-      - name: Setup go
+      - name: Setup go  ${{ matrix.go }}
         uses: actions/setup-go@v2
         with:
           go-version: ${{ matrix.go }}
@@ -50,5 +51,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
       
-      - run: go ${{ matrix.ver }} 
+      - name: ${{ matrix.ver }}  video-srt-windows in go  ${{ matrix.go }}
+        run: go ${{ matrix.ver }} 
 
