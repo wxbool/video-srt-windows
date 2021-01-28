@@ -33,7 +33,7 @@ jobs:
       matrix:
         ver: [ 'test','build' ]
         go: [ '1.15','1.14', '1.13' ]
-    name: Go ${{ matrix.go }} ${{ matrix.ver }} 
+    name:  ${{ matrix.ver }} video-srt-windows With Go${{ matrix.go }}
     steps:
       - uses: actions/checkout@v2
       
