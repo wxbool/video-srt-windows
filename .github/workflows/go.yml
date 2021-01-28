@@ -1,4 +1,4 @@
-name: Go
+name: Build&test video-srt-windows
 
 on:
   push:
@@ -28,7 +28,6 @@ on:
 jobs:
 
   Build:
-    name: Build&test video-srt-windows
     runs-on: windows-latest
     strategy:
       matrix:
