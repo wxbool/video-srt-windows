@@ -1,0 +1,47 @@
+name: Build&test video-srt-windows
+
+on: 
+  pull_request:
+    branches:
+      - master
+      - test
+      - i18n
+  push:
+    branches: 
+      - master
+      - test
+      - i18n
+
+
+jobs:
+  Build:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        ver: [ 'test','build' ]
+        go: [ '1.15','1.14', '1.13' ]
+    name:  ${{ matrix.ver }} video-srt-windows With Go${{ matrix.go }}
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Setup go  ${{ matrix.go }}
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go }}
+      
+
+      - name: ${{ matrix.ver }}  video-srt-windows in go  ${{ matrix.go }}
+        run: go ${{ matrix.ver }} 
+      - name: Cache local go package
+        uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+      - name: Artifact Pack
+        uses: actions/upload-artifact@v2
+        with:  
+          name: videosrt-${{ matrix.ver }}-${{ matrix.go }}.exe
+          path: videosrt.exe
+          

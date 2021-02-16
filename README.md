@@ -1,4 +1,11 @@
-# VideoSrt简介
+# VideoSrt
+
+[![GitHub license](https://img.shields.io/github/license/wxbool/video-srt-windows?logo=Apache&style=flat-square)](https://github.com/wxbool/video-srt-windows/blob/master/LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/wxbool/video-srt-windows?style=flat-square)](https://github.com/wxbool/video-srt-windows/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/wxbool/video-srt-windows?logo=github&style=flat-square)](https://github.com/wxbool/video-srt-windows/network)
+![GitHub Action](https://github.com/wxbool/video-srt-windows/workflows/Go/badge.svg?branch=master)
+
+## 简介
 
 `VideoSrt` 是用 `Golang`语言，基于 [lxn/walk](https://github.com/lxn/walk) Windows-GUI 工具包开发。
 
