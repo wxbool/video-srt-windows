@@ -1,25 +1,9 @@
 name: Build&test video-srt-windows
 
-on:
-  push:
-      paths-ignore:
-        - '**/*.md'
-        - .gitignore
-        - .editorconfig
-        - appveyor.yml
-        - 'azure-pipelines*.yml'
-        - 'ci/azure-pipelines/template*.yml'
+on: 
+  [push,pull_request]
 
-  pull_request:
-      paths-ignore:
-        - '**/*.md'
-        - .gitignore
-        - .editorconfig
-        - appveyor.yml
-        - 'azure-pipelines*.yml'
-        - 'ci/azure-pipelines/template*.yml'
 jobs:
-
   Build:
     runs-on: windows-latest
     strategy:
