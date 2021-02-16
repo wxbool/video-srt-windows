@@ -48,5 +48,6 @@ jobs:
       - name: Artifact Pack
         uses: actions/upload-artifact@v2
         with:  
+          name: videosrt-${{ matrix.ver }}-${{ matrix.go }}.exe
           path: videosrt.exe
           
