@@ -1,7 +1,17 @@
 name: Build&test video-srt-windows
 
 on: 
-  [push,pull_request]
+  pull_request:
+    branches:
+      - master
+      - test
+      - i18n
+  push:
+    branches: 
+      - master
+      - test
+      - i18n
+
 
 jobs:
   Build:
