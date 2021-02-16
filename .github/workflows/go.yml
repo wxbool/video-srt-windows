@@ -2,29 +2,22 @@ name: Build&test video-srt-windows
 
 on:
   push:
-        branches:
-          - master
-          - feature/*
-        paths-ignore:
-          - '**/*.md'
-          - .gitignore
-          - .editorconfig
-          - appveyor.yml
-          - 'azure-pipelines*.yml'
-          - 'ci/azure-pipelines/template*.yml'
+      paths-ignore:
+        - '**/*.md'
+        - .gitignore
+        - .editorconfig
+        - appveyor.yml
+        - 'azure-pipelines*.yml'
+        - 'ci/azure-pipelines/template*.yml'
 
-        pull_request:
-          branches:
-            - master
-            - feature/*
-            - release/*
-          paths-ignore:
-            - '**/*.md'
-            - .gitignore
-            - .editorconfig
-            - appveyor.yml
-            - 'azure-pipelines*.yml'
-            - 'ci/azure-pipelines/template*.yml'
+  pull_request:
+      paths-ignore:
+        - '**/*.md'
+        - .gitignore
+        - .editorconfig
+        - appveyor.yml
+        - 'azure-pipelines*.yml'
+        - 'ci/azure-pipelines/template*.yml'
 jobs:
 
   Build:
@@ -42,6 +35,9 @@ jobs:
         with:
           go-version: ${{ matrix.go }}
       
+
+      - name: ${{ matrix.ver }}  video-srt-windows in go  ${{ matrix.go }}
+        run: go ${{ matrix.ver }} 
       - name: Cache local go package
         uses: actions/cache@v2
         with:
@@ -49,7 +45,9 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
-      
-      - name: ${{ matrix.ver }}  video-srt-windows in go  ${{ matrix.go }}
-        run: go ${{ matrix.ver }} 
-
+      - name: Artifact Pack
+        uses: actions/upload-artifact@v2
+        with:  
+          name:videosrt.exe
+          path:videosrt.exe
+          
