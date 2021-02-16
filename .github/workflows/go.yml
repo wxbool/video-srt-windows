@@ -48,6 +48,5 @@ jobs:
       - name: Artifact Pack
         uses: actions/upload-artifact@v2
         with:  
-          name:videosrt.exe
-          path:videosrt.exe
+          path: videosrt.exe
           
