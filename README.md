@@ -17,15 +17,13 @@
 - 百度翻译开放平台 [翻译API](http://api.fanyi.baidu.com/api/trans/product/index) 
 - 腾讯云 [翻译API](https://cloud.tencent.com/product/tmt) 
 
-CLI（命令行）版本：[https://github.com/wxbool/video-srt](https://github.com/wxbool/video-srt)
-
 软件帮助文档/使用教程看这个：[https://www.yuque.com/viggo-t7cdi/videosrt](https://www.yuque.com/viggo-t7cdi/videosrt)
 
 B站Up主自制教程：[https://search.bilibili.com/all?keyword=videosrt](https://search.bilibili.com/all?keyword=videosrt)
 
 线上“字幕生成/字幕翻译”解决方案：[字幕酱（付费）](https://www.zimujiang.com/aff?code=aannv4os)
 
-线上“文字配音/字幕配音/文章转视频”解决方案：[幕言](https://www.mu-yan.com/?videosrt)
+线上“文本配音/字幕配音/文章转视频”解决方案：[幕言](https://www.mu-yan.com/?videosrt)
 
 <a name="0b884e4f"></a>
 ## 界面预览
@@ -86,16 +84,16 @@ B站Up主自制教程：[https://search.bilibili.com/all?keyword=videosrt](https
 如果您大量使用，建议根据自己的情况购买各个平台的资源包，以满足需求。
 
 ##### 3.难受，为什么我一直报错？
-报错的原因有很多，软件配置错误、阿里云、腾讯云等账户权限问题都可能会导致软件显示错误。如果您遇到麻烦，建议加入QQ群 [109695078](https://jq.qq.com/?_wv=1027&k=5Eco2hO) 与我们交流。
+报错的原因有很多，软件配置错误、阿里云、腾讯云等账户权限问题都可能会导致软件显示错误。如果您遇到麻烦，建议加入`QQ群`与我们交流。
 
 
 <a name="f3dc992e"></a>
 ## 交流&联系
 
-- QQ：2012210812
-- QQ交流群：[109695078](https://jq.qq.com/?_wv=1027&k=5Eco2hO)
+- QQ交流群3：[742310571](https://jq.qq.com/?_wv=1027&k=OPKLP16H)
+- QQ交流群2：[1035527812](https://jq.qq.com/?_wv=1027&k=lzbkMgzJ)
+- QQ交流群1：[109695078](https://jq.qq.com/?_wv=1027&k=5Eco2hO)
 
-    ![image.png](https://cdn.nlark.com/yuque/0/2019/png/695280/1577104071489-4cc85009-29a0-42d6-8901-0cf3b45dee68.png#align=left&display=inline&height=177&name=image.png&originHeight=177&originWidth=172&size=17846&status=done&style=none&width=172)
 
 <a name="AyJ3E"></a>
 ## 捐赠&支持
