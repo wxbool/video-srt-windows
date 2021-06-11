@@ -395,6 +395,9 @@ func SubString(str string , begin int ,length int) (substr string) {
 	if begin >= lth {
 		begin = lth
 	}
+	if length < 0 {
+		length = 0
+	}
 	end := begin + length
 	if end > lth {
 		end = lth
