@@ -11,7 +11,7 @@
 
 这是一个可以识别视频语音自动生成字幕SRT文件的开源软件工具。<br />适用于快速、批量的为媒体（视频/音频）生成中/英文字幕、文本文件的业务场景。
 
-0.3.2 版本将会使用以下接口：
+0.3.3 版本将会使用以下接口：
 - 阿里云 [OSS对象存储](https://www.aliyun.com/product/oss?spm=5176.12825654.eofdhaal5.13.e9392c4aGfj5vj&aly_as=K11FcpO8)
 - 阿里云 [录音文件识别](https://ai.aliyun.com/nls/filetrans?spm=5176.12061031.1228726.1.47fe3cb43I34mn) 
 - 百度翻译开放平台 [翻译API](http://api.fanyi.baidu.com/api/trans/product/index) 
@@ -55,8 +55,8 @@ B站Up主自制教程：[https://search.bilibili.com/all?keyword=videosrt](https
 
 <a name="e66a66f1"></a>
 ##### 下载地址:
-- (v0.3.2)（含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.3.2/video-srt-gui-ffmpeg-0.3.2-x64.zip)
-- (v0.3.2)（不含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.3.2/video-srt-gui-0.3.2-x64.zip)
+- (v0.3.3)（含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.3.3/video-srt-gui-ffmpeg-0.3.3-x64.zip)
+- (v0.3.3)（不含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.3.3/video-srt-gui-0.3.3-x64.zip)
 - (v0.2.6)（含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.2.6/video-srt-gui-ffmpeg-0.2.6-x64.zip)
 - (v0.2.6)（不含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.2.6/video-srt-gui-0.2.6-x64.zip)
 
@@ -74,6 +74,16 @@ B站Up主自制教程：[https://search.bilibili.com/all?keyword=videosrt](https
 - 先下载最新版本的软件包
 - 然后用旧版本软件的 `data` 文件夹覆盖新版软件的 `data` 文件夹
 - 0.2.6 升级至 0.2.9 以上的版本时，由于翻译设置无法直接兼容低版本，可能需要重新在软件创建翻译引擎才能继续使用翻译功能
+
+## 其他
+今日，有小伙伴在淘宝、闲鱼上发现一些界面相似的盗版且额外收费的软件。由于`VideoSrt` 是开源软件，所以不排除个别不良用户通过微调软件源代码，然后进行二次售卖甚至传播病毒。 
+
+目前已知的有：`大象字幕`
+
+因此，软件的安装包不要在第三方平台渠道下载，尽量在 github/码云/帮助文档 等官方渠道的页面进行下载。
+
+小伙伴们要擦亮眼睛，打击盗版，望周知！
+
 
 ## FAQ
 ##### 1.为什么Linux和Mac不能用？

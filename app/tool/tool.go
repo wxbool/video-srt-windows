@@ -167,7 +167,7 @@ func MusicLrcTextMillisecond(time int64) string {
 	var minText = RepeatStr(strconv.FormatInt(min , 10) , "0" , 2 , true)
 	var millisecondText = RepeatStr(strconv.FormatInt(millisecond , 10) , "0" , 2 , true)
 
-	return minText + ":" + miaoText + ":" + millisecondText
+	return minText + ":" + miaoText + "." + millisecondText
 }
 
 

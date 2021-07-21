@@ -3,9 +3,9 @@ package aliyun
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk"
 	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/requests"
+	"github.com/aliyun/alibaba-cloud-sdk-go/sdk/responses"
 	"strconv"
 	"time"
 )
@@ -66,14 +66,14 @@ const KEY_APP_KEY string = "appkey"
 const KEY_FILE_LINK string = "file_link"
 const KEY_VERSION string = "version"
 const KEY_ENABLE_WORDS string = "enable_words"
-//是否启用统一后处理，默认值为 false
-const ENABLE_UNIFY_POST string = "enable_unify_post"
-//是否打开ITN，中文数字将转为阿拉伯数字输出，默认值为 false
-//开启时需要设置version为”4.0”， enable_unify_post 必须为 true
-const ENABLE_INVERSE_TEXT_NORMALIZATION string = "enable_inverse_text_normalization"
-//如需启用后处理模型，默认值为 chinese，开启时需要设置version为”4.0”，
-//enable_unify_post 必须为 true，可选值为 english
-const UNIFY_POST_MODEL_NAME string = "unify_post_model_name"
+
+//是否打开ITN，中文数字将转为阿拉伯数字输出，默认值为false
+const KEY_ENABLE_INVERSE_TEXT_NORMAL = "enable_inverse_text_normalization"
+//是否启⽤语义断句，取值：true/false，默认值false
+const KEY_ENABLE_SEMANTIC_SENTENCE_DETECTION = "enable_semantic_sentence_detection"
+//是否启用时间戳校准功能，取值：true/false，默认值false
+const KEY_ENABLE_TIMESTAMP_ALIGNMENT = "enable_timestamp_alignment"
+
 // 响应参数key
 const KEY_TASK string = "Task"
 const KEY_TASK_ID string = "TaskId"
@@ -89,8 +89,6 @@ const STATUS_QUEUEING string = "QUEUEING"
 //接口文档 https://help.aliyun.com/document_detail/90727.html?spm=a2c4g.11186623.6.581.691af6ebYsUkd1
 func (c AliyunClound) NewAudioFile(fileLink string) (string , *sdk.Client , error) {
 	regionId, domain, apiVersion, product := c.GetApiVariable()
-
-	fmt.Println( regionId, domain, apiVersion, product , c.Region )
 
 	client, err := sdk.NewClientWithAccessKey(regionId, c.AccessKeyId, c.AccessKeySecret)
 	if err != nil {
@@ -114,10 +112,10 @@ func (c AliyunClound) NewAudioFile(fileLink string) (string , *sdk.Client , erro
 	// 设置是否输出词信息，默认为false，开启时需要设置version为4.0
 	mapTask[KEY_ENABLE_WORDS] = "true"
 
-	//启用统一后处理
-	//mapTask[ENABLE_UNIFY_POST] = "true"
-	//mapTask[ENABLE_INVERSE_TEXT_NORMALIZATION] = "true"
-	//mapTask[UNIFY_POST_MODEL_NAME] = "chinese"
+	//统一后处理
+	mapTask[KEY_ENABLE_INVERSE_TEXT_NORMAL] = "true"
+	mapTask[KEY_ENABLE_SEMANTIC_SENTENCE_DETECTION] = "true"
+	mapTask[KEY_ENABLE_TIMESTAMP_ALIGNMENT] = "true"
 
 	// to json
 	task, err := json.Marshal(mapTask)
@@ -158,7 +156,7 @@ func (c AliyunClound) NewAudioFile(fileLink string) (string , *sdk.Client , erro
 
 //获取录音文件识别结果
 //接口文档 https://help.aliyun.com/document_detail/90727.html?spm=a2c4g.11186623.6.581.691af6ebYsUkd1
-func (c AliyunClound) GetAudioFileResult(taskId string , client *sdk.Client , callback func(result []byte)) error {
+func (c AliyunClound) GetAudioFileResult(taskId string , client *sdk.Client , logOutput func(text string) , callback func(result []byte)) (err error) {
 	_, domain, apiVersion, product := c.GetApiVariable()
 
 	getRequest := requests.NewCommonRequest()
@@ -170,26 +168,43 @@ func (c AliyunClound) GetAudioFileResult(taskId string , client *sdk.Client , ca
 	getRequest.QueryParams[KEY_TASK_ID] = taskId
 	statusText := ""
 
-	//遍历获取识别结果
-	for true {
-		getResponse, err := client.ProcessCommonRequest(getRequest)
-		if err != nil {
-			return err
-		}
-		getResponseContent := getResponse.GetHttpContentString()
 
+	var (
+		trys = 0
+		getResponse *responses.CommonResponse
+		getResponseContent string
+	)
+
+	//遍历获取识别结果
+	for trys < 10 {
+
+		if trys != 0 {
+			logOutput("尝试重新查询识别结果，第" + strconv.Itoa(trys) + "次")
+		}
+
+		getResponse, err = client.ProcessCommonRequest(getRequest)
+		if err != nil {
+			logOutput("查询识别结果失败：" + err.Error())
+			trys++
+			time.Sleep(time.Second * time.Duration(trys))
+			continue
+		}
+
+		getResponseContent = getResponse.GetHttpContentString()
 		if (getResponse.GetHttpStatus() != 200) {
-			return errors.New("识别结果查询请求失败 , Http错误码 : " + strconv.Itoa(getResponse.GetHttpStatus()))
+			logOutput("查询识别结果失败，Http错误码：" + strconv.Itoa(getResponse.GetHttpStatus()))
+			trys++
+			time.Sleep(time.Second * time.Duration(trys))
+			continue
 		}
 
 		var getMapResult map[string]interface{}
 		err = json.Unmarshal([]byte(getResponseContent), &getMapResult)
 		if err != nil {
-			return err
+			trys++
+			logOutput("查询识别结果失败，解析结果失败：" + err.Error())
+			continue
 		}
-
-		//调用回调函数
-		callback(getResponse.GetHttpContentBytes())
 
 		//校验遍历条件
 		statusText = getMapResult[KEY_STATUS_TEXT].(string)
@@ -200,11 +215,14 @@ func (c AliyunClound) GetAudioFileResult(taskId string , client *sdk.Client , ca
 		}
 	}
 
-	if statusText != STATUS_SUCCESS {
-		return errors.New("录音文件识别失败 , (" + c.GetErrorStatusTextMessage(statusText) + ")")
+	if statusText == STATUS_SUCCESS && getResponse != nil {
+		//调用回调函数
+		callback(getResponse.GetHttpContentBytes())
+	} else {
+		err = errors.New("录音文件识别失败 , (" + c.GetErrorStatusTextMessage(statusText) + ")")
+		return
 	}
-
-	return nil
+	return
 }
 
 

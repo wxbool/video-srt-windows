@@ -44,7 +44,6 @@ func VailFfmpegLibrary() error {
 //校验ffmpeg并加入临时环境遍历
 func VailTempFfmpegLibrary(rootDir string)  {
 	ffmpegDir := tool.WinDir(rootDir + "/ffmpeg")
-	//fmt.Println("VailTempFfmpegLibrary " , ffmpegDir)
 
 	if tool.DirExists(ffmpegDir) {
 		//临时加入用户环境变量

@@ -234,7 +234,7 @@ func (app *VideoSrt) Run(video string) {
 	}
 
 	//阿里云录音文件识别
-	AudioResult , IntelligentBlockResult := AliyunAudioRecognition(app , app.AliyunClound, filelink)
+	AudioResult , IntelligentBlockResult := AliyunAudioRecognition(app , video , app.AliyunClound, filelink)
 
 	app.Log("文件识别成功 , 字幕处理中 ..." , video)
 
@@ -398,7 +398,7 @@ func CheckEmptyResult(AudioResult map[int64][] *aliyun.AliyunAudioRecognitionRes
 
 
 //阿里云录音文件识别
-func AliyunAudioRecognition(app *VideoSrt , engine aliyun.AliyunClound , filelink string) (AudioResult map[int64][] *aliyun.AliyunAudioRecognitionResult , IntelligentBlockResult map[int64][] *aliyun.AliyunAudioRecognitionResult) {
+func AliyunAudioRecognition(app *VideoSrt , video string , engine aliyun.AliyunClound , filelink string) (AudioResult map[int64][] *aliyun.AliyunAudioRecognitionResult , IntelligentBlockResult map[int64][] *aliyun.AliyunAudioRecognitionResult) {
 	//创建识别请求
 	taskid, client, e := engine.NewAudioFile(filelink)
 	if e != nil {
@@ -409,9 +409,10 @@ func AliyunAudioRecognition(app *VideoSrt , engine aliyun.AliyunClound , filelin
 	IntelligentBlockResult = make(map[int64][] *aliyun.AliyunAudioRecognitionResult)
 
 	//遍历获取识别结果
-	resultError := engine.GetAudioFileResult(taskid , client , func(result []byte) {
-		//mylog.WriteLog(string(result))
-
+	resultError := engine.GetAudioFileResult(taskid , client , func(text string) {
+		//日志输出
+		app.Log(text , video)
+	} , func(result []byte) {
 		//结果处理
 		statusText, _ := jsonparser.GetString(result, "StatusText") //结果状态
 

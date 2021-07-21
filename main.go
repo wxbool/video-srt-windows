@@ -13,7 +13,7 @@ import (
 )
 
 //应用版本号
-const APP_VERSION = "0.3.2"
+const APP_VERSION = "0.3.3"
 
 var AppRootDir string
 var mw *MyMainWindow
@@ -308,6 +308,12 @@ func main() {
 					Image: "./data/img/muyan.png",
 					OnTriggered: func() {
 						_ = tool.OpenUrl("https://www.mu-yan.net/")
+					},
+				},
+				Menu{
+					Text:  "实时字幕小工具",
+					OnTriggered: func() {
+						_ = tool.OpenUrl("https://gitee.com/641453620/livecaption")
 					},
 				},
 			},
@@ -769,17 +775,6 @@ func main() {
 								mw.NewErrormationTips("错误" , "请先设置Oss对象配置")
 								return
 							}
-							//校验输入语言
-							if tempAppSetting.InputLanguage != LANGUAGE_ZH &&
-								tempAppSetting.InputLanguage != LANGUAGE_EN &&
-								tempAppSetting.InputLanguage != LANGUAGE_JP &&
-								tempAppSetting.InputLanguage != LANGUAGE_KOR &&
-								tempAppSetting.InputLanguage != LANGUAGE_RU &&
-								tempAppSetting.InputLanguage != LANGUAGE_SPA {
-								mw.NewErrormationTips("错误" , "由于语音提供商的限制，生成字幕仅支持中文、英文、日语、韩语、俄语、西班牙语")
-								return
-							}
-
 							//查询选择的语音引擎
 							if tempAppSetting.CurrentEngineId == 0 {
 								mw.NewErrormationTips("错误" , "请先新建/选择语音引擎")
