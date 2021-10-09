@@ -100,12 +100,17 @@ B站Up主自制教程：[https://search.bilibili.com/all?keyword=videosrt](https
 <a name="f3dc992e"></a>
 ## 交流&联系
 
-- QQ交流群3：[742310571](https://jq.qq.com/?_wv=1027&k=OPKLP16H)
-- QQ交流群2：[1035527812](https://jq.qq.com/?_wv=1027&k=lzbkMgzJ)
-- QQ交流群1：[109695078](https://jq.qq.com/?_wv=1027&k=5Eco2hO)
+- QQ交流群3：[742310571](https://jq.qq.com/?_wv=1027&k=OPKLP16H) (已满)
+- QQ交流群2：[1035527812](https://jq.qq.com/?_wv=1027&k=lzbkMgzJ) (980/1000)
+- QQ交流群1：[109695078](https://jq.qq.com/?_wv=1027&k=5Eco2hO) (已满)
 
 
 <a name="AyJ3E"></a>
 ## 捐赠&支持
 
 ![](https://pic2.superbed.cn/item/5e00b93476085c3289dd2dc0.png)
+
+#### 每日领支付宝红包（2021.8 ~ 2021.11）
+<div style="text-align: center;">
+    <img src="https://cdn.nlark.com/yuque/0/2021/png/695280/1633671491324-b3375ad6-027b-4297-bd7f-2f42784dccbf.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_23%2Ctext_VmlkZW9TcnQ%3D%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10%2Fresize%2Cw_794%2Climit_0" width=220 />
+</div>
