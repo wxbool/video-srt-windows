@@ -11,7 +11,7 @@
 
 这是一个可以识别视频语音自动生成字幕SRT文件的开源软件工具。<br />适用于快速、批量的为媒体（视频/音频）生成中/英文字幕、文本文件的业务场景。
 
-0.3.3 版本将会使用以下接口：
+0.3.5 版本将会使用以下接口：
 - 阿里云 [OSS对象存储](https://www.aliyun.com/product/oss?spm=5176.12825654.eofdhaal5.13.e9392c4aGfj5vj&aly_as=K11FcpO8)
 - 阿里云 [录音文件识别](https://ai.aliyun.com/nls/filetrans?spm=5176.12061031.1228726.1.47fe3cb43I34mn) 
 - 百度翻译开放平台 [翻译API](http://api.fanyi.baidu.com/api/trans/product/index) 
@@ -55,8 +55,8 @@ B站Up主自制教程：[https://search.bilibili.com/all?keyword=videosrt](https
 
 <a name="e66a66f1"></a>
 ##### 下载地址:
-- (v0.3.3)（含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.3.3/video-srt-gui-ffmpeg-0.3.3-x64.zip)
-- (v0.3.3)（不含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.3.3/video-srt-gui-0.3.3-x64.zip)
+- (v0.3.5)（含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.3.5/video-srt-gui-ffmpeg-0.3.5-x64.zip)
+- (v0.3.5)（不含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.3.5/video-srt-gui-0.3.5-x64.zip)
 - (v0.2.6)（含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.2.6/video-srt-gui-ffmpeg-0.2.6-x64.zip)
 - (v0.2.6)（不含ffmpeg依赖） [点我下载](http://file.viggo.site/video-srt/0.2.6/video-srt-gui-0.2.6-x64.zip)
 
@@ -100,15 +100,15 @@ B站Up主自制教程：[https://search.bilibili.com/all?keyword=videosrt](https
 <a name="f3dc992e"></a>
 ## 交流&联系
 
-- QQ交流群3：[742310571](https://jq.qq.com/?_wv=1027&k=OPKLP16H) (已满)
-- QQ交流群2：[1035527812](https://jq.qq.com/?_wv=1027&k=lzbkMgzJ) (980/1000)
+- QQ交流群3：[742310571](https://jq.qq.com/?_wv=1027&k=OPKLP16H) 
+- QQ交流群2：[1035527812](https://jq.qq.com/?_wv=1027&k=lzbkMgzJ) (已满)
 - QQ交流群1：[109695078](https://jq.qq.com/?_wv=1027&k=5Eco2hO) (已满)
 
 
 <a name="AyJ3E"></a>
 ## 捐赠&支持
 
-![](https://pic2.superbed.cn/item/5e00b93476085c3289dd2dc0.png)
+![](https://cdn.nlark.com/yuque/0/2021/png/695280/1633671491324-b3375ad6-027b-4297-bd7f-2f42784dccbf.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_23%2Ctext_VmlkZW9TcnQ%3D%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10%2Fresize%2Cw_794%2Climit_0)
 
 #### 每日领支付宝红包（2021.8 ~ 2021.11）
 <div style="text-align: center;">

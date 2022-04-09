@@ -284,6 +284,10 @@ func (app *VideoSrt) RunTranslate(s string , file string) (*VideoSrtTranslateRes
 	var trys int = 0
 	translateResult := new(VideoSrtTranslateResult)
 
+	if strings.TrimSpace(s) == "" {
+		return translateResult , nil
+	}
+
 	if app.TranslateCfg.Supplier == TRANSLATE_SUPPLIER_BAIDU {
 		if app.TranslateCfg.BaiduTranslate.AuthenType == translate.ACCOUNT_COMMON_AUTHEN { //百度翻译标准版
 			//休眠1010毫秒
@@ -400,7 +404,7 @@ func CheckEmptyResult(AudioResult map[int64][] *aliyun.AliyunAudioRecognitionRes
 //阿里云录音文件识别
 func AliyunAudioRecognition(app *VideoSrt , video string , engine aliyun.AliyunClound , filelink string) (AudioResult map[int64][] *aliyun.AliyunAudioRecognitionResult , IntelligentBlockResult map[int64][] *aliyun.AliyunAudioRecognitionResult) {
 	//创建识别请求
-	taskid, client, e := engine.NewAudioFile(filelink)
+	taskid, client, e := engine.NewAudioFile(filelink , app.TranslateCfg.InputLanguage)
 	if e != nil {
 		panic(e)
 	}
@@ -413,6 +417,7 @@ func AliyunAudioRecognition(app *VideoSrt , video string , engine aliyun.AliyunC
 		//日志输出
 		app.Log(text , video)
 	} , func(result []byte) {
+
 		//结果处理
 		statusText, _ := jsonparser.GetString(result, "StatusText") //结果状态
 

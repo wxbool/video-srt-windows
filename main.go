@@ -13,7 +13,7 @@ import (
 )
 
 //应用版本号
-const APP_VERSION = "0.3.3"
+const APP_VERSION = "0.3.5"
 
 var AppRootDir string
 var mw *MyMainWindow
@@ -307,13 +307,13 @@ func main() {
 					Text:  "语音合成配音/文章转视频",
 					Image: "./data/img/muyan.png",
 					OnTriggered: func() {
-						_ = tool.OpenUrl("https://www.mu-yan.net/")
+						_ = tool.OpenUrl("https://www.muyanpeiyin.com/")
 					},
 				},
 				Menu{
-					Text:  "实时字幕小工具",
+					Text:  "Videosrt Pro 付费版",
 					OnTriggered: func() {
-						_ = tool.OpenUrl("https://gitee.com/641453620/livecaption")
+						_ = tool.OpenUrl("https://www.yuque.com/viggo-t7cdi/videosrt-pro/cpwtwl")
 					},
 				},
 			},
@@ -730,7 +730,7 @@ func main() {
 				Children: []Widget{
 					PushButton{
 						AssignTo: &startBtn,
-						Text: "生成字幕",
+						Text: "生成识别字幕",
 						MinSize:Size{Height:50},
 						OnClicked: func() {
 
@@ -860,7 +860,7 @@ func main() {
 										finish = true
 										startBtn.SetEnabled(true)
 										startTranslateBtn.SetEnabled(true)
-										startBtn.SetText("生成字幕")
+										startBtn.SetText("生成识别字幕")
 
 										tasklog.AppendLogText("\r\n\r\n任务完成！")
 
@@ -881,7 +881,7 @@ func main() {
 										finish = true
 										startBtn.SetEnabled(true)
 										startTranslateBtn.SetEnabled(true)
-										startBtn.SetText("生成字幕")
+										startBtn.SetText("生成识别字幕")
 
 										tasklog.AppendLogText("\r\n\r\n任务完成！")
 
@@ -896,7 +896,7 @@ func main() {
 
 					PushButton{
 						AssignTo: &startTranslateBtn,
-						Text: "字幕处理",
+						Text: "字幕翻译转换",
 						MinSize:Size{Height:50},
 						OnClicked: func() {
 							//待处理的文件
@@ -993,7 +993,7 @@ func main() {
 										finish = true
 										startBtn.SetEnabled(true)
 										startTranslateBtn.SetEnabled(true)
-										startTranslateBtn.SetText("字幕翻译")
+										startTranslateBtn.SetText("字幕翻译转换")
 
 										tasklog.AppendLogText("\r\n\r\n任务完成！")
 									}()
@@ -1011,7 +1011,7 @@ func main() {
 										finish = true
 										startBtn.SetEnabled(true)
 										startTranslateBtn.SetEnabled(true)
-										startTranslateBtn.SetText("字幕翻译")
+										startTranslateBtn.SetText("字幕翻译转换")
 
 										tasklog.AppendLogText("\r\n\r\n任务完成！")
 									}()

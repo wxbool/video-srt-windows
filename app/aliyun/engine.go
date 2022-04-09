@@ -87,7 +87,7 @@ const STATUS_QUEUEING string = "QUEUEING"
 
 //发起录音文件识别
 //接口文档 https://help.aliyun.com/document_detail/90727.html?spm=a2c4g.11186623.6.581.691af6ebYsUkd1
-func (c AliyunClound) NewAudioFile(fileLink string) (string , *sdk.Client , error) {
+func (c AliyunClound) NewAudioFile(fileLink string , languageId int) (string , *sdk.Client , error) {
 	regionId, domain, apiVersion, product := c.GetApiVariable()
 
 	client, err := sdk.NewClientWithAccessKey(regionId, c.AccessKeyId, c.AccessKeySecret)
@@ -113,9 +113,11 @@ func (c AliyunClound) NewAudioFile(fileLink string) (string , *sdk.Client , erro
 	mapTask[KEY_ENABLE_WORDS] = "true"
 
 	//统一后处理
-	mapTask[KEY_ENABLE_INVERSE_TEXT_NORMAL] = "true"
-	mapTask[KEY_ENABLE_SEMANTIC_SENTENCE_DETECTION] = "true"
-	mapTask[KEY_ENABLE_TIMESTAMP_ALIGNMENT] = "true"
+	if languageId == 1 || languageId == 2 {
+		mapTask[KEY_ENABLE_INVERSE_TEXT_NORMAL] = "true"
+		mapTask[KEY_ENABLE_SEMANTIC_SENTENCE_DETECTION] = "true"
+		mapTask[KEY_ENABLE_TIMESTAMP_ALIGNMENT] = "true"
+	}
 
 	// to json
 	task, err := json.Marshal(mapTask)
@@ -197,7 +199,7 @@ func (c AliyunClound) GetAudioFileResult(taskId string , client *sdk.Client , lo
 			time.Sleep(time.Second * time.Duration(trys))
 			continue
 		}
-
+		
 		var getMapResult map[string]interface{}
 		err = json.Unmarshal([]byte(getResponseContent), &getMapResult)
 		if err != nil {
