@@ -21,9 +21,9 @@
 
 B站Up主自制教程：[https://search.bilibili.com/all?keyword=videosrt](https://search.bilibili.com/all?keyword=videosrt)
 
-线上“字幕生成/字幕翻译”解决方案：[字幕酱（付费）](https://www.zimujiang.com/aff?code=aannv4os)
+##### Videosrt Pro 已发布，全新字幕生成神器，建议使用！产品说明详见：https://www.yuque.com/viggo-t7cdi/videosrt-pro/cpwtwl
 
-线上“文本配音/字幕配音/文章转视频”解决方案：[幕言](https://www.mu-yan.com/?videosrt)
+线上“字幕生成/字幕翻译”解决方案：[字幕酱（付费）](https://www.zimujiang.com/aff?code=aannv4os)
 
 <a name="0b884e4f"></a>
 ## 界面预览
@@ -109,8 +109,3 @@ B站Up主自制教程：[https://search.bilibili.com/all?keyword=videosrt](https
 ## 捐赠&支持
 
 ![](https://cdn.nlark.com/yuque/0/2021/png/695280/1633671491324-b3375ad6-027b-4297-bd7f-2f42784dccbf.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_23%2Ctext_VmlkZW9TcnQ%3D%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10%2Fresize%2Cw_794%2Climit_0)
-
-#### 每日领支付宝红包（2021.8 ~ 2021.11）
-<div style="text-align: center;">
-    <img src="https://cdn.nlark.com/yuque/0/2021/png/695280/1633671491324-b3375ad6-027b-4297-bd7f-2f42784dccbf.png?x-oss-process=image%2Fwatermark%2Ctype_d3F5LW1pY3JvaGVp%2Csize_23%2Ctext_VmlkZW9TcnQ%3D%2Ccolor_FFFFFF%2Cshadow_50%2Ct_80%2Cg_se%2Cx_10%2Cy_10%2Fresize%2Cw_794%2Climit_0" width=220 />
-</div>
