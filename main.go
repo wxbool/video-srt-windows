@@ -1035,8 +1035,6 @@ func main() {
 		},
 	}.Create()); err != nil {
 		log.Fatal(err)
-
-		time.Sleep(1 * time.Second)
 	}
 
 	//更新
