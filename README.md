@@ -21,7 +21,7 @@
 
 B站Up主自制教程：[https://search.bilibili.com/all?keyword=videosrt](https://search.bilibili.com/all?keyword=videosrt)
 
-##### Videosrt Pro 已发布，全新字幕生成神器，建议使用！产品说明详见：https://www.yuque.com/viggo-t7cdi/videosrt-pro/cpwtwl
+##### Videosrt Pro 已发布，支持语音转字幕、字幕翻译、视频智能翻译配音、人声分离、视频字幕压制、字幕格式转换、字幕自动打轴、视频硬字幕提取，建议使用！软件下载/说明详见：https://www.yuque.com/viggo-t7cdi/videosrt-pro/cpwtwl
 
 线上“字幕生成/字幕翻译”解决方案：[字幕酱（付费）](https://www.zimujiang.com/aff?code=aannv4os)
 
@@ -100,6 +100,7 @@ B站Up主自制教程：[https://search.bilibili.com/all?keyword=videosrt](https
 <a name="f3dc992e"></a>
 ## 交流&联系
 
+- 团队合作伙伴QQ：417504864
 - QQ交流群3：[742310571](https://jq.qq.com/?_wv=1027&k=OPKLP16H) 
 - QQ交流群2：[1035527812](https://jq.qq.com/?_wv=1027&k=lzbkMgzJ) (已满)
 - QQ交流群1：[109695078](https://jq.qq.com/?_wv=1027&k=5Eco2hO) (已满)
